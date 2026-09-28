@@ -52,6 +52,10 @@ The MCP server (`start_session`, `log_event`, `end_session`, `export`) only know
 - **Redaction always runs before a write.** Keys, tokens, emails, phone numbers, IPs, Luhn-valid cards, and home-dir usernames become placeholders like `[API_KEY_1]`. Only a salted hash → placeholder map is kept.
 - **It's regex, so it's best-effort.** Review exports before you share them. Found a leak? That's a [security issue](SECURITY.md). More in [docs/redaction.md](docs/redaction.md).
 
+## 🔏 Sealed sessions
+
+Events are hash-chained as they are written. `seal <id> --tsa` adds a Merkle batch with an RFC 3161 timestamp, and `verify <id>` reports OK or the exact tampered lines. See [docs/sealed-sessions.md](docs/sealed-sessions.md).
+
 ## 🧭 Architecture
 
 ```mermaid

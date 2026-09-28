@@ -7,3 +7,4 @@ export { handleHook, transcriptToEvents, importClaudeTranscript } from './adapte
 export { CodexParser, importCodexSession, tailCodexSession, latestCodexSession } from './adapters/codex.js';
 export { createMcpServer } from './mcp.js';
 export { startViewer } from './viewer.js';
+export * from './seal.js';

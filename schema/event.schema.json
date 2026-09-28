@@ -3,21 +3,105 @@
   "$id": "https://github.com/SM260845/agent-session-recorder/schema/event.schema.json",
   "title": "agent-session-recorder event",
   "type": "object",
-  "required": ["id", "ts", "sessionId", "actor", "type", "payload"],
+  "required": [
+    "id",
+    "ts",
+    "sessionId",
+    "actor",
+    "type",
+    "payload"
+  ],
   "properties": {
-    "id": { "type": "string", "minLength": 1 },
-    "parentId": { "type": ["string", "null"] },
-    "ts": { "type": "string", "format": "date-time" },
-    "sessionId": { "type": "string", "minLength": 1 },
-    "actor": { "enum": ["user", "ai", "tool", "system"] },
-    "type": { "enum": ["session.start", "session.end", "prompt", "reply", "reasoning", "tool.call", "tool.result", "plan", "decision", "note", "usage", "error"] },
-    "payload": { "type": "object" },
-    "provider": { "type": "string" },
-    "reasoningSource": { "enum": ["full", "summary", "none"], "description": "Only provider-exposed reasoning is recorded. Hidden chain-of-thought is never claimed." },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parentId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "enum": [
+        "user",
+        "ai",
+        "tool",
+        "system"
+      ]
+    },
+    "type": {
+      "enum": [
+        "session.start",
+        "session.end",
+        "prompt",
+        "reply",
+        "reasoning",
+        "tool.call",
+        "tool.result",
+        "plan",
+        "decision",
+        "note",
+        "usage",
+        "error"
+      ]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "reasoningSource": {
+      "enum": [
+        "full",
+        "summary",
+        "none"
+      ],
+      "description": "Only provider-exposed reasoning is recorded. Hidden chain-of-thought is never claimed."
+    },
     "attributes": {
       "type": "object",
       "description": "OpenTelemetry GenAI semantic convention aligned attributes (gen_ai.*)",
-      "additionalProperties": { "type": ["string", "number", "boolean"] }
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean"
+        ]
+      }
+    },
+    "seal": {
+      "type": "object",
+      "description": "Hash-chain seal added on write (see docs/sealed-sessions.md)",
+      "required": [
+        "seq",
+        "prev",
+        "hash"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "prev": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
     }
   },
   "additionalProperties": false
