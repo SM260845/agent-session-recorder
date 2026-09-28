@@ -1,0 +1,42 @@
+name: 🔌 New adapter request
+description: Ask for support for another agent, CLI, or API.
+title: "feat(adapter): "
+labels: [adapter, enhancement]
+body:
+  - type: input
+    id: tool
+    attributes:
+      label: Tool / provider
+      placeholder: "e.g. Grok CLI, Aider, Gemini CLI"
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: How can sessions be observed?
+      description: Hooks, log/transcript files (path + format), an API, MCP? Links to official docs help a lot.
+    validations:
+      required: true
+  - type: checkboxes
+    id: exposes
+    attributes:
+      label: What does the tool expose?
+      options:
+        - label: Prompts
+        - label: Visible replies
+        - label: Reasoning (full text)
+        - label: Reasoning (summaries only)
+        - label: Tool calls + results
+        - label: Token usage / model
+  - type: textarea
+    id: sample
+    attributes:
+      label: Synthetic sample lines
+      description: A few **made-up** lines in the native format. No real sessions.
+      render: json
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to build this adapter (see docs/adapters.md).

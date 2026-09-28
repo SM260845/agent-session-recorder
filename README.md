@@ -1,110 +1,87 @@
-# agent-session-recorder
+<div align="center">
 
-**A local-first flight recorder for AI coding and agent sessions.** It records what happened in a
-session (prompts, visible replies, reasoning the provider exposed, tool calls with args, results,
-timing and errors, decisions, and session metadata) as one normalized JSONL timeline. You can
-export it to Markdown or a self-contained HTML file, or watch it live in a small local viewer.
+# 🛩️ agent-session-recorder
 
-- **Local-first.** Everything goes to `~/.agent-session-recorder/`. There is no network, telemetry or cloud.
-- **Redaction is always on** unless you pass `--no-redact`. It runs *before* anything is written or streamed.
-- **Honest about reasoning.** Only provider-exposed reasoning is stored, and each entry is labelled
-  `reasoningSource: full | summary | none`. We never claim to capture hidden chain-of-thought.
+**The code is the result. The session is the artifact.**
 
-> Status: **v0.1 (lean v1)**. The Claude Code and Codex CLI adapters were built against the documented
-> file/hook formats and tested with **small synthetic fixtures** (`test/fixtures/`). No real
-> Claude Code or Codex sessions were available when this was built. Please open an issue if your
-> real transcripts differ.
+A local-first flight recorder for AI coding agents. Every prompt, tool call, and decision, on one redacted timeline.
 
-## Quickstart
+[![CI](https://github.com/SM260845/agent-session-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/SM260845/agent-session-recorder/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D22.12-339933?logo=node.js&logoColor=white)](package.json)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Not published to npm yet. The npm name `agent-session-recorder` is reserved-pending for this project (currently unclaimed); after publication, `npx agent-session-recorder init` will be supported. For now, use the git-clone install below.
+</div>
+
+- **What:** it records Claude Code, Codex CLI, and any MCP host into one normalized JSONL timeline. You can export it as Markdown or HTML, or watch it live.
+- **Why:** a diff shows you what changed. The session shows you how the agent got there: the prompts, the tool calls, the dead ends. That part is usually lost.
+- **How:** everything stays on your machine. Secrets are redacted before anything touches disk. Reasoning is stored only when the provider exposes it, and it's labelled honestly.
+
+> **Status: v0.1.** The adapters are built against documented formats and tested on synthetic fixtures. Real-world transcripts are wanted ([#10](https://github.com/SM260845/agent-session-recorder/issues/10)).
+
+## ⚡ 30-second quickstart
+
+Not on npm yet, so install from a clone:
 
 ```bash
 git clone https://github.com/SM260845/agent-session-recorder && cd agent-session-recorder
-npm ci && npm run build && npm link      # provides the `agent-session-recorder` command
-agent-session-recorder init                      # dry-run: detects claude/codex and prints the config
-agent-session-recorder init --write              # merges hooks into ~/.claude/settings.json (+ .bak) and adds MCP to ~/.codex/config.toml
-agent-session-recorder view                      # http://127.0.0.1:4318 live timeline
+npm ci && npm run build && npm link   # installs the `agent-session-recorder` command
+agent-session-recorder init           # dry-run: detects claude/codex, prints the config it would add
+agent-session-recorder init --write   # Claude hooks (+ .bak) and Codex MCP config
+agent-session-recorder view           # live timeline at http://127.0.0.1:4318
 ```
 
-| Command | What it does |
-|---|---|
-| `agent-session-recorder hook` | Claude Code hook handler (reads hook JSON on stdin; never blocks the agent) |
-| `agent-session-recorder import-claude <file>` | Import a `~/.claude/projects/*/*.jsonl` transcript |
-| `agent-session-recorder codex import <file\|--latest>` | Import a Codex rollout from `~/.codex/sessions/**/rollout-*.jsonl` |
-| `agent-session-recorder codex tail [--latest]` | Follow a live Codex session file |
-| `agent-session-recorder mcp` | MCP server on stdio (`start_session`, `log_event`, `end_session`, `export`; resource `session-recorder://session/current`) |
-| `agent-session-recorder export <id> [--format md,html,jsonl] [--out dir]` | Export a session |
-| `agent-session-recorder view [--port N]` | Local HTTP + WebSocket viewer with nested tool calls and actor/type filters |
-| `agent-session-recorder list` / `redact` | List sessions / redact stdin (to test your rules) |
+No agent handy? Open [`examples/claude-fixture-1.html`](examples/claude-fixture-1.html) to see a recorded session.
 
-Flags: `--no-redact` and `--research`. Research mode truncates big tool outputs to `{sha256, size, head}`
-and replaces repeated file dumps with `{duplicateOf}`.
+More commands: `import-claude <file>`, `codex import|tail [--latest]`, `mcp`, `export <id> --format md,html,jsonl`, `list`, `redact`. Flags: `--research` (shrinks large or repeated tool output), `--no-redact` (you probably don't want this one).
 
-## What each provider exposes
+## 🎥 What gets captured
 
-| Source | Prompts | Visible replies | Reasoning | Tool calls / results | Timing | Tokens / model |
-|---|---|---|---|---|---|---|
-| **Claude Code hooks + transcript** | ✅ `UserPromptSubmit` | ✅ from transcript on `Stop` | `summary` for Claude 4+ summarized thinking, `full` for 3.7, `none` for redacted thinking | ✅ `PreToolUse`/`PostToolUse` | ✅ measured Pre→Post | ✅ from transcript `usage` |
-| **Codex CLI rollout files** | ✅ | ✅ | `summary` (reasoning summaries); `none` when only `encrypted_content` | ✅ `function_call`/`_output` (exit code → error) | ✅ from timestamps | ✅ `token_count` |
-| **MCP (any host, e.g. Grok, Claude Desktop)** | only if the agent logs it | only if the agent logs it | only what the agent sends | only what the agent sends | event timestamps | only if sent |
-| Claude / OpenAI / xAI **APIs** directly | _deferred: API proxy_ | | xAI `reasoning_content` via proxy is deferred | | | |
+| Source | Prompts & replies | Reasoning | Tool calls / results | Timing | Tokens / model |
+|---|---|---|---|---|---|
+| **Claude Code** (hooks + transcript) | ✅ | `summary` (4+), `full` (3.7), `none` (redacted) | ✅ Pre/PostToolUse | ✅ measured | ✅ |
+| **Codex CLI** (rollout import + live tail) | ✅ | `summary`; `none` if encrypted-only | ✅ exit code → error | ✅ | ✅ |
+| **MCP** (any host) | only what the agent logs | only what the agent sends | only what the agent sends | ✅ event ts | if sent |
+| Direct APIs (OpenAI / Anthropic / xAI) | 🔜 [#1](https://github.com/SM260845/agent-session-recorder/issues/1) | 🔜 [#3](https://github.com/SM260845/agent-session-recorder/issues/3) | | | |
 
-**The MCP server only sees what the host sends it.** It cannot observe the host's own prompts, hidden
-reasoning, or tool calls made outside MCP. [`SKILL.md`](SKILL.md) tells agents to log their plan,
-decisions and outcome.
+The MCP server (`start_session`, `log_event`, `end_session`, `export`) only knows what the host tells it. [`SKILL.md`](SKILL.md) asks agents to report their plan, decisions, and outcome. Schema details are in [docs/event-schema.md](docs/event-schema.md).
 
-## Event schema
+## 🔒 Privacy
 
-TypeScript: [`src/schema.ts`](src/schema.ts). JSON Schema: [`schema/event.schema.json`](schema/event.schema.json).
+- **Local only.** Data is written to `~/.agent-session-recorder/` with `0600` file permissions. No network calls, no telemetry, no cloud.
+- **Redaction always runs before a write.** Keys, tokens, emails, phone numbers, IPs, Luhn-valid cards, and home-dir usernames become placeholders like `[API_KEY_1]`. Only a salted hash → placeholder map is kept.
+- **It's regex, so it's best-effort.** Review exports before you share them. Found a leak? That's a [security issue](SECURITY.md). More in [docs/redaction.md](docs/redaction.md).
 
-```json
-{"id":"…","parentId":"<tool.call id>","ts":"2026-09-28T10:00:03.500Z","sessionId":"…","actor":"tool",
- "type":"tool.result","provider":"claude-code","payload":{"output":"…","isError":false,"durationMs":1500},
- "attributes":{"gen_ai.system":"anthropic","gen_ai.tool.name":"Read"}}
+## 🧭 Architecture
+
+```mermaid
+flowchart LR
+  A[Claude Code hooks/transcripts] --> R
+  B[Codex rollout files] --> R
+  C[MCP host] --> R
+  R[Recorder<br/>redact → research-shrink] --> S[(JSONL per session)]
+  S --> E[Export: md / html / jsonl]
+  S --> V[Live viewer :4318]
 ```
 
-- `actor` is one of `user | ai | tool | system`.
-- `type` is one of `session.start | session.end | prompt | reply | reasoning | tool.call | tool.result | plan | decision | note | usage | error`.
-- `attributes` follow the OpenTelemetry GenAI conventions (`gen_ai.system`, `gen_ai.request.model`,
-  `gen_ai.usage.input_tokens`, `gen_ai.tool.name`, `gen_ai.tool.call.id`, …).
-- Storage is one JSONL file per session in `~/.agent-session-recorder/sessions/`. Exports go to `~/.agent-session-recorder/exports/`,
-  and are written automatically on `Stop`/`SessionEnd` hooks and on MCP `end_session`.
+More detail in [docs/architecture.md](docs/architecture.md) and [docs/adapters.md](docs/adapters.md).
 
-## Privacy and redaction
+## 🛠️ Contribute in 10 minutes
 
-Built-in regex rules produce typed, consistent placeholders (`[EMAIL_1]`, `[API_KEY_2]` and so on). They cover:
+1. Pick a [`good first issue`](https://github.com/SM260845/agent-session-recorder/labels/good%20first%20issue). Each one points to the files you'll need.
+2. `npm ci && npm run build && npm test`: green in well under a minute.
+3. Read [CONTRIBUTING.md](CONTRIBUTING.md) (it's short). Using an AI agent? Point it at [AGENTS.md](AGENTS.md).
 
-- emails and phone numbers
-- API keys and tokens: `sk-`/`sk-ant-`/`sk-proj-`, `xai-`, `ghp_`/`github_pat_`, AWS `AKIA…`, Google `AIza…`, Slack `xox…`, npm, JWTs, `Bearer` tokens, PEM private keys
-- IPv4 addresses (localhost is kept)
-- credit cards (only when the Luhn check passes)
-- home-directory usernames (`/home/<user>`, `/Users/<user>`, `C:\Users\<user>`)
-- `*_TOKEN=` / `*SECRET*=` / `*PASSWORD=` env-style secrets (the name is kept)
+Have questions or ideas? Head to [Discussions](https://github.com/SM260845/agent-session-recorder/discussions).
 
-Placeholders stay consistent across hook invocations in a session. Only a **salted hash → placeholder** map is
-persisted, never the raw values. Files are created with mode `0600`.
+## 🗺️ Roadmap
 
-You can edit the rules in `~/.agent-session-recorder/redact-rules.json`. See [`examples/redact-rules.example.json`](examples/redact-rules.example.json):
-`rules` (custom regexes, which run first), `disable` (built-in rule names) and `allow` (literal values to keep).
+[API proxy #1](https://github.com/SM260845/agent-session-recorder/issues/1) · [Grok CLI adapter #2](https://github.com/SM260845/agent-session-recorder/issues/2) · [xAI reasoning #3](https://github.com/SM260845/agent-session-recorder/issues/3) · [NER redaction #4](https://github.com/SM260845/agent-session-recorder/issues/4) · [Session diff #5](https://github.com/SM260845/agent-session-recorder/issues/5) · [Cost charts #6](https://github.com/SM260845/agent-session-recorder/issues/6) · [Dataset export #7](https://github.com/SM260845/agent-session-recorder/issues/7) · [OTel #8](https://github.com/SM260845/agent-session-recorder/issues/8) · [Cloud sync #9](https://github.com/SM260845/agent-session-recorder/issues/9) · [Real-session validation #10](https://github.com/SM260845/agent-session-recorder/issues/10)
 
-Regex redaction is best-effort. Review exports before sharing them. Local NER redaction is on the roadmap.
+## 📚 The series behind it
 
-## Demo session
+1. [Part 1](https://gist.github.com/SM260845/0941ebfa5d91728d79663fb240adf9b0) · 2. [Part 2](https://gist.github.com/SM260845/d844d0af560490b5435904dd7f84abef) · 3. [Part 3](https://gist.github.com/SM260845/88a561948656703bd007d6ec78756236)
 
-[`examples/`](examples/) has synthetic, redacted sessions generated from the test fixtures:
-`claude-fixture-1.{md,html,jsonl}` and `codex-fixture-1.{md,html,jsonl}`. Open the `.html` file in a browser.
+## License
 
-## Roadmap (deferred)
-
-API proxy (OpenAI/Anthropic formats), Grok CLI adapter, xAI `reasoning_content` via proxy, local NER
-redaction, session diff view, token/cost charts, anonymized dataset export, OTel ingest, and optional
-cloud sync. See the GitHub issues.
-
-## Development
-
-```bash
-npm ci && npm run build && npm test   # Node ≥ 22.12, vitest
-```
-
-MIT licensed.
+[MIT](LICENSE). Record freely.

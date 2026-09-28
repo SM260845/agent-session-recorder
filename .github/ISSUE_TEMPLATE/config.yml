@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions & ideas
+    url: https://github.com/SM260845/agent-session-recorder/discussions
+    about: Ask, brainstorm, or show off a session in Discussions.
+  - name: 🔒 Security / real-data redaction leak
+    url: https://github.com/SM260845/agent-session-recorder/security/advisories/new
+    about: Report privately. Never paste real secrets or PII in a public issue.

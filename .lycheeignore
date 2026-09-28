@@ -1,0 +1,6 @@
+# Login-gated or rate-limited GitHub pages
+^https://github\.com/.*/security/advisories/new
+^https://github\.com/.*/issues/new
+^https://github\.com/.*/actions/workflows/.*/badge\.svg
+^https://img\.shields\.io/
+^http://127\.0\.0\.1

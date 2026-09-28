@@ -1,0 +1,31 @@
+name: ✨ Feature request
+description: Suggest an improvement. For bigger ideas, try Discussions first.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What's painful or missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should happen? CLI or UI sketches welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Project principles
+      options:
+        - label: This keeps data local-first and redaction on by default.
+          required: true
+        - label: I'd be up for opening a PR.

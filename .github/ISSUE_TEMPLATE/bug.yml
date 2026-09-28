@@ -1,0 +1,41 @@
+name: 🐛 Bug report
+description: Something recorded, exported, or displayed wrong.
+title: "fix: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "⚠️ **Don't paste real transcripts, secrets, or personal data.** Trim and fake them first."
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you expected vs. what you got.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. agent-session-recorder codex import --latest\n2. ..."
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options: [Claude Code hooks, Claude transcript import, Codex import, Codex tail, MCP server, Viewer, Export, init, Other]
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "OS, Node version, agent-session-recorder commit, Claude Code / Codex version"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / sample events (redacted)
+      render: shell

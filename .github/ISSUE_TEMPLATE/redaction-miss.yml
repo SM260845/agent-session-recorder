@@ -1,0 +1,38 @@
+name: 🕵️ Redaction miss (synthetic example only)
+description: A secret or PII pattern that got past redaction. Use FAKE values only.
+title: "fix(redact): "
+labels: [redaction, bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🛑 Stop. Do NOT paste real secrets, keys, emails, or personal data here.
+        This issue is public. If a **real** value leaked into your files, rotate it now and
+        [report privately](https://github.com/SM260845/agent-session-recorder/security/advisories/new) instead.
+  - type: input
+    id: kind
+    attributes:
+      label: What kind of value?
+      placeholder: "e.g. Stripe live key, Azure SAS token, AU phone number"
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Fake example with the same shape
+      description: Invent a value with the same format (prefix, length, charset).
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Where did it appear?
+      description: Prompt, tool output, env var, file path, JSON field…
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: The example above is fake and contains no real secret or personal data.
+          required: true
