@@ -18,6 +18,8 @@ Usage:
   agent-session-recorder mcp                            run the MCP server on stdio
   agent-session-recorder view [--port 4318]             local live viewer (127.0.0.1)
   agent-session-recorder export <sessionId> [--format md|html|jsonl] [--out dir]
+  agent-session-recorder seal <sessionId> [--tsa url]   Merkle-batch new events; --tsa adds an RFC 3161 timestamp
+  agent-session-recorder verify <sessionId> [--json]    check hash chain, batches and timestamps (exit 2 on tamper)
   agent-session-recorder list                           list recorded sessions
   agent-session-recorder redact                         redact stdin -> stdout (test your rules)
 
@@ -35,7 +37,7 @@ async function main() {
     allowPositionals: true, strict: false,
     options: {
       'no-redact': { type: 'boolean' }, research: { type: 'boolean' }, write: { type: 'boolean' },
-      latest: { type: 'boolean' }, port: { type: 'string' }, format: { type: 'string' }, out: { type: 'string' }, help: { type: 'boolean', short: 'h' },
+      latest: { type: 'boolean' }, port: { type: 'string' }, format: { type: 'string' }, out: { type: 'string' }, tsa: { type: 'string' }, json: { type: 'boolean' }, help: { type: 'boolean', short: 'h' },
     },
   });
   const rec = new Recorder({ redact: !values['no-redact'], research: !!values.research });
@@ -80,6 +82,26 @@ async function main() {
       if (!a1) throw new Error('usage: export <sessionId>');
       const fmts = (values.format ? String(values.format).split(',') : ['jsonl', 'md', 'html']) as ExportFormat[];
       console.log(exportSession(a1, fmts, values.out ? String(values.out) : undefined).join('\n'));
+      break;
+    }
+    case 'seal': {
+      if (!a1) throw new Error('usage: seal <sessionId> [--tsa url]');
+      const { sealSession } = await import('./seal.js');
+      const tsa = values.tsa === undefined ? undefined : String(values.tsa || 'https://freetsa.org/tsr');
+      const b = await sealSession(a1, { tsa });
+      console.log(b ? JSON.stringify({ ...b, tsa: b.tsa ? { url: b.tsa.url, bytes: Buffer.from(b.tsa.tsr, 'base64').length } : undefined }, null, 2) : 'nothing new to seal');
+      break;
+    }
+    case 'verify': {
+      if (!a1) throw new Error('usage: verify <sessionId>');
+      const { verifySession } = await import('./seal.js');
+      const r = verifySession(a1);
+      if (values.json) console.log(JSON.stringify(r, null, 2));
+      else {
+        console.log(`${r.ok ? 'OK' : 'TAMPERED'}  ${r.sessionId}: ${r.sealed}/${r.events} events sealed, ${r.batches} batches (${r.timestamped} timestamped), ${r.unbatched} not yet batched`);
+        for (const e of r.errors) console.log(`  ✗ ${e}`);
+      }
+      process.exitCode = r.ok ? 0 : 2;
       break;
     }
     case 'list':

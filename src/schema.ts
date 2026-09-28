@@ -52,9 +52,11 @@ export interface SessionEvent {
   provider?: string;
   reasoningSource?: ReasoningSource;
   attributes?: GenAiAttributes;
+  /** Hash-chain seal (added on write). See src/seal.ts. */
+  seal?: { seq: number; prev: string; hash: string };
 }
 
-export type EventInput = Omit<SessionEvent, 'id' | 'ts'> & { id?: string; ts?: string };
+export type EventInput = Omit<SessionEvent, 'id' | 'ts' | 'seal'> & { id?: string; ts?: string };
 
 export const ACTORS: Actor[] = ['user', 'ai', 'tool', 'system'];
 export const EVENT_TYPES: EventType[] = [

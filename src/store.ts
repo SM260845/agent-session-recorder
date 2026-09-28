@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type { SessionEvent } from './schema.js';
+import { sealEvent } from './seal.js';
 
 export function homeDir(): string {
   return process.env.AGENT_SESSION_RECORDER_HOME || path.join(os.homedir(), '.agent-session-recorder');
@@ -20,7 +21,7 @@ export function ensureDirs(): void {
 
 export function appendEvent(e: SessionEvent): void {
   ensureDirs();
-  fs.appendFileSync(sessionFile(e.sessionId), JSON.stringify(e) + '\n', { mode: 0o600 });
+  fs.appendFileSync(sessionFile(e.sessionId), JSON.stringify(sealEvent(e)) + '\n', { mode: 0o600 });
 }
 
 export function readSession(id: string): SessionEvent[] {
