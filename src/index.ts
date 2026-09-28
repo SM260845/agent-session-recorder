@@ -8,3 +8,4 @@ export { CodexParser, importCodexSession, tailCodexSession, latestCodexSession }
 export { createMcpServer } from './mcp.js';
 export { startViewer } from './viewer.js';
 export * from './seal.js';
+export * from './bundle.js';

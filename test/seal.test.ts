@@ -69,3 +69,18 @@ describe('sealed sessions', () => {
     expect(checkTimeStampResp(fakeResp, 'cd'.repeat(32))).toMatch(/does not cover/);
   });
 });
+
+describe('proof bundle', () => {
+  it('links intent and commit inside the sealed chain', async () => {
+    const os = await import('node:os'); const path = await import('node:path');
+    const { writeBundle } = await import('../src/bundle.js');
+    const id = record(2, 'b1');
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'proof-'));
+    const file = await writeBundle(id, { intent: '20260929-demo', commit: 'a'.repeat(40), cwd: dir });
+    const b = JSON.parse(fs.readFileSync(file, 'utf8'));
+    expect(b).toMatchObject({ v: 1, intent: '20260929-demo', commit: 'a'.repeat(40) });
+    expect(b.events.at(-1).payload).toMatchObject({ kind: 'proof.link', intent: '20260929-demo' });
+    expect(verifySession(id, b.events, b.batches).ok).toBe(true);
+    await expect(writeBundle(id, { intent: 'bad id', commit: 'x' })).rejects.toThrow(/YYYYMMDD/);
+  });
+});

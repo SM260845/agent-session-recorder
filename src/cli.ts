@@ -18,8 +18,9 @@ Usage:
   agent-session-recorder mcp                            run the MCP server on stdio
   agent-session-recorder view [--port 4318]             local live viewer (127.0.0.1)
   agent-session-recorder export <sessionId> [--format md|html|jsonl] [--out dir]
-  agent-session-recorder seal <sessionId> [--tsa url]   Merkle-batch new events; --tsa adds an RFC 3161 timestamp
+  agent-session-recorder seal <sessionId> [--timestamp | --tsa url]   Merkle-batch new events; add an RFC 3161 timestamp (default TSA: freetsa.org)
   agent-session-recorder verify <sessionId> [--json]    check hash chain, batches and timestamps (exit 2 on tamper)
+  agent-session-recorder bundle <sessionId> --intent <id> [--timestamp | --tsa url] [--out .proof]   write a proof bundle for a proof-carrying PR
   agent-session-recorder list                           list recorded sessions
   agent-session-recorder redact                         redact stdin -> stdout (test your rules)
 
@@ -37,7 +38,7 @@ async function main() {
     allowPositionals: true, strict: false,
     options: {
       'no-redact': { type: 'boolean' }, research: { type: 'boolean' }, write: { type: 'boolean' },
-      latest: { type: 'boolean' }, port: { type: 'string' }, format: { type: 'string' }, out: { type: 'string' }, tsa: { type: 'string' }, json: { type: 'boolean' }, help: { type: 'boolean', short: 'h' },
+      latest: { type: 'boolean' }, port: { type: 'string' }, format: { type: 'string' }, out: { type: 'string' }, tsa: { type: 'string' }, json: { type: 'boolean' }, intent: { type: 'string' }, timestamp: { type: 'boolean' }, help: { type: 'boolean', short: 'h' },
     },
   });
   const rec = new Recorder({ redact: !values['no-redact'], research: !!values.research });
@@ -85,9 +86,9 @@ async function main() {
       break;
     }
     case 'seal': {
-      if (!a1) throw new Error('usage: seal <sessionId> [--tsa url]');
+      if (!a1) throw new Error('usage: seal <sessionId> [--timestamp | --tsa url]');
       const { sealSession } = await import('./seal.js');
-      const tsa = values.tsa === undefined ? undefined : String(values.tsa || 'https://freetsa.org/tsr');
+      const tsa = values.tsa ? String(values.tsa) : values.timestamp ? 'https://freetsa.org/tsr' : undefined;
       const b = await sealSession(a1, { tsa });
       console.log(b ? JSON.stringify({ ...b, tsa: b.tsa ? { url: b.tsa.url, bytes: Buffer.from(b.tsa.tsr, 'base64').length } : undefined }, null, 2) : 'nothing new to seal');
       break;
@@ -102,6 +103,13 @@ async function main() {
         for (const e of r.errors) console.log(`  ✗ ${e}`);
       }
       process.exitCode = r.ok ? 0 : 2;
+      break;
+    }
+    case 'bundle': {
+      if (!a1 || !values.intent) throw new Error('usage: bundle <sessionId> --intent <YYYYMMDD-slug> [--timestamp | --tsa url] [--out .proof]');
+      const { writeBundle } = await import('./bundle.js');
+      const tsa = values.tsa ? String(values.tsa) : values.timestamp ? 'https://freetsa.org/tsr' : undefined;
+      console.log(await writeBundle(a1, { intent: String(values.intent), tsa, outDir: values.out ? String(values.out) : undefined }));
       break;
     }
     case 'list':

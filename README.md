@@ -54,7 +54,7 @@ The MCP server (`start_session`, `log_event`, `end_session`, `export`) only know
 
 ## 🔏 Sealed sessions
 
-Events are hash-chained as they are written. `seal <id> --tsa` adds a Merkle batch with an RFC 3161 timestamp, and `verify <id>` reports OK or the exact tampered lines. See [docs/sealed-sessions.md](docs/sealed-sessions.md).
+Events are hash-chained as they are written. `seal <id> --timestamp` adds a Merkle batch with an RFC 3161 timestamp, and `verify <id>` reports OK or the exact tampered lines. See [docs/sealed-sessions.md](docs/sealed-sessions.md).
 
 ## 🧭 Architecture
 
