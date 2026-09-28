@@ -1,6 +1,6 @@
 {
   "name": "agent-session-recorder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local-first flight recorder for AI coding/agent sessions (Claude Code, Codex CLI, MCP hosts). Redaction on by default.",
   "type": "module",
   "license": "MIT",
