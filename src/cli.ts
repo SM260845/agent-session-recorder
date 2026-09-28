@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { parseArgs } from 'node:util';
 import { Recorder } from './recorder.js';
 import { handleHook, importClaudeTranscript } from './adapters/claude.js';
+import { parseCliArgs, resolveTsa } from './cli-flags.js';
 import { importCodexSession, latestCodexSession, tailCodexSession } from './adapters/codex.js';
 import { exportSession, type ExportFormat } from './exporters.js';
 import { listSessions } from './store.js';
@@ -34,13 +34,7 @@ async function readStdin(): Promise<string> {
 }
 
 async function main() {
-  const { values, positionals } = parseArgs({
-    allowPositionals: true, strict: false,
-    options: {
-      'no-redact': { type: 'boolean' }, research: { type: 'boolean' }, write: { type: 'boolean' },
-      latest: { type: 'boolean' }, port: { type: 'string' }, format: { type: 'string' }, out: { type: 'string' }, tsa: { type: 'string' }, json: { type: 'boolean' }, intent: { type: 'string' }, timestamp: { type: 'boolean' }, help: { type: 'boolean', short: 'h' },
-    },
-  });
+  const { values, positionals, tokens } = parseCliArgs(process.argv.slice(2));
   const rec = new Recorder({ redact: !values['no-redact'], research: !!values.research });
   const [cmd, a1, a2] = positionals;
   switch (cmd) {
@@ -88,7 +82,7 @@ async function main() {
     case 'seal': {
       if (!a1) throw new Error('usage: seal <sessionId> [--timestamp | --tsa url]');
       const { sealSession } = await import('./seal.js');
-      const tsa = values.tsa ? String(values.tsa) : values.timestamp ? 'https://freetsa.org/tsr' : undefined;
+      const tsa = resolveTsa(values, tokens);
       const b = await sealSession(a1, { tsa });
       console.log(b ? JSON.stringify({ ...b, tsa: b.tsa ? { url: b.tsa.url, bytes: Buffer.from(b.tsa.tsr, 'base64').length } : undefined }, null, 2) : 'nothing new to seal');
       break;
@@ -108,7 +102,7 @@ async function main() {
     case 'bundle': {
       if (!a1 || !values.intent) throw new Error('usage: bundle <sessionId> --intent <YYYYMMDD-slug> [--timestamp | --tsa url] [--out .proof]');
       const { writeBundle } = await import('./bundle.js');
-      const tsa = values.tsa ? String(values.tsa) : values.timestamp ? 'https://freetsa.org/tsr' : undefined;
+      const tsa = resolveTsa(values, tokens);
       console.log(await writeBundle(a1, { intent: String(values.intent), tsa, outDir: values.out ? String(values.out) : undefined }));
       break;
     }

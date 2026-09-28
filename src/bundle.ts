@@ -23,14 +23,22 @@ export async function writeBundle(sessionId: string, opts: { intent: string; out
   if (!/^\d{8}-[a-z0-9-]+$/.test(opts.intent)) throw new Error(`intent id must look like YYYYMMDD-slug, got "${opts.intent}"`);
   if (!readSession(sessionId).length) throw new Error(`no session "${sessionId}"`);
   const commit = opts.commit ?? execFileSync('git', ['rev-parse', 'HEAD'], { cwd: opts.cwd, encoding: 'utf8' }).trim();
-  new Recorder({ redact: false }).record({ sessionId, actor: 'system', type: 'note', payload: { kind: 'proof.link', intent: opts.intent, commit } });
+  const [link] = new Recorder().record({ sessionId, actor: 'system', type: 'note', payload: { kind: 'proof.link', intent: opts.intent, commit } });
   await sealSession(sessionId, { tsa: opts.tsa });
   const v = verifySession(sessionId);
   if (!v.ok) throw new Error(`session does not verify, refusing to bundle:\n  ${v.errors.join('\n  ')}`);
-  const bundle: ProofBundle = { v: 1, intent: opts.intent, sessionId, commit, createdAt: new Date().toISOString(), events: readSession(sessionId), batches: readBatches(sessionId) };
+  const bundle: ProofBundle = {
+    v: 1,
+    intent: opts.intent,
+    sessionId,
+    commit: String((link.payload as { commit?: string }).commit ?? commit),
+    createdAt: new Date().toISOString(),
+    events: readSession(sessionId),
+    batches: readBatches(sessionId),
+  };
   const dir = path.resolve(opts.cwd ?? '.', opts.outDir ?? '.proof');
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${opts.intent}.json`);
-  fs.writeFileSync(file, JSON.stringify(bundle, null, 1) + '\n');
+  fs.writeFileSync(file, JSON.stringify(bundle, null, 1) + '\n', { mode: 0o600 });
   return file;
 }
