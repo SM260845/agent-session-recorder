@@ -54,7 +54,9 @@ The MCP server (`start_session`, `log_event`, `end_session`, `export`) only know
 
 ## 🔏 Sealed sessions
 
-Events are hash-chained as they are written. `seal <id> --tsa` adds a Merkle batch with an RFC 3161 timestamp, and `verify <id>` reports OK or the exact tampered lines. See [docs/sealed-sessions.md](docs/sealed-sessions.md).
+Events are hash-chained as they are written. `seal <id> --timestamp` adds a Merkle batch with an RFC 3161 timestamp, and `verify <id>` reports OK or the exact tampered lines. See [docs/sealed-sessions.md](docs/sealed-sessions.md).
+
+To ship a proof-carrying PR, run `bundle <sessionId> --intent <YYYYMMDD-slug> [--timestamp | --tsa url]`. It records a sealed `proof.link` event tying that intent to the current `git HEAD`, refuses to write a bundle if `verify` fails, and writes `.proof/<intent>.json` by default. Reviewers can then run the independent `proof-check` flow against that JSON bundle instead of trusting the local CLI output alone.
 
 ## 🧭 Architecture
 

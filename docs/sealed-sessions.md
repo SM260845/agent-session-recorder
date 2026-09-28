@@ -7,12 +7,12 @@ Tamper evidence for recorded sessions. Three layers, all local, no new dependenc
    Editing, deleting, inserting or reordering an event breaks the chain from that point on.
 2. **Merkle batches (`seal <id>`).** Builds an RFC 6962-style Merkle root over every event
    not yet batched and appends it to `<id>.batches.jsonl`, linked to the previous batch root.
-3. **RFC 3161 timestamp (`seal <id> --tsa [url]`).** Sends the batch root to a Time Stamping
+3. **RFC 3161 timestamp (`seal <id> --timestamp`, or `--tsa <url>`).** Sends the batch root to a Time Stamping
    Authority (default `https://freetsa.org/tsr`) and stores the signed response. This anchors
    the root outside your machine, so rewriting and re-chaining the whole log is detectable.
 
 ```bash
-agent-session-recorder seal <id> --tsa        # batch + timestamp new events
+agent-session-recorder seal <id> --timestamp  # batch + timestamp new events
 agent-session-recorder verify <id>            # OK, or TAMPERED with the exact lines (exit 2)
 agent-session-recorder verify <id> --json
 ```
