@@ -17,7 +17,7 @@ export it to Markdown or a self-contained HTML file, or watch it live in a small
 
 ## Quickstart
 
-Not published to npm yet. The npm name `agent-session-recorder` is reserved-pending for this project (currently unclaimed); npm installation will be viable after publication.
+Not published to npm yet. The npm name `agent-session-recorder` is reserved-pending for this project (currently unclaimed); after publication, `npx agent-session-recorder init` will be supported. For now, use the git-clone install below.
 
 ```bash
 git clone https://github.com/SM260845/agent-session-recorder && cd agent-session-recorder
