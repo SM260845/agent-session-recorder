@@ -4,6 +4,10 @@
 
 **The code is the result. The session is the artifact.**
 
+[![npm version](https://img.shields.io/npm/v/agent-session-recorder?logo=npm&color=cb3837)](https://www.npmjs.com/package/agent-session-recorder)
+[![npm downloads](https://img.shields.io/npm/dm/agent-session-recorder?color=cb3837)](https://www.npmjs.com/package/agent-session-recorder)
+[![license](https://img.shields.io/npm/l/agent-session-recorder)](LICENSE)
+
 A local-first flight recorder for AI coding agents. Every prompt, tool call, and decision, on one redacted timeline.
 
 [![CI](https://github.com/SM260845/agent-session-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/SM260845/agent-session-recorder/actions/workflows/ci.yml)
