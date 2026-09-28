@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+import { parseArgs } from 'node:util';
+import { Recorder } from './recorder.js';
+import { handleHook, importClaudeTranscript } from './adapters/claude.js';
+import { importCodexSession, latestCodexSession, tailCodexSession } from './adapters/codex.js';
+import { exportSession, type ExportFormat } from './exporters.js';
+import { listSessions } from './store.js';
+import { Redactor, loadRulesFile } from './redact.js';
+
+const HELP = `agent-blackbox — local-first flight recorder for AI agent sessions
+
+Usage:
+  agent-blackbox init [--write]                 detect claude/codex, print (or write) hook + MCP config
+  agent-blackbox hook                           Claude Code hook handler (reads hook JSON on stdin)
+  agent-blackbox import-claude <transcript.jsonl>
+  agent-blackbox codex import <rollout.jsonl|--latest>
+  agent-blackbox codex tail [rollout.jsonl|--latest]
+  agent-blackbox mcp                            run the MCP server on stdio
+  agent-blackbox view [--port 4318]             local live viewer (127.0.0.1)
+  agent-blackbox export <sessionId> [--format md|html|jsonl] [--out dir]
+  agent-blackbox list                           list recorded sessions
+  agent-blackbox redact                         redact stdin -> stdout (test your rules)
+
+Global flags: --no-redact (disable redaction; ON by default), --research (truncate big/repeated tool output)
+Data: ~/.agent-blackbox (override with AGENT_BLACKBOX_HOME)`;
+
+async function readStdin(): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const c of process.stdin) chunks.push(c as Buffer);
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+async function main() {
+  const { values, positionals } = parseArgs({
+    allowPositionals: true, strict: false,
+    options: {
+      'no-redact': { type: 'boolean' }, research: { type: 'boolean' }, write: { type: 'boolean' },
+      latest: { type: 'boolean' }, port: { type: 'string' }, format: { type: 'string' }, out: { type: 'string' }, help: { type: 'boolean', short: 'h' },
+    },
+  });
+  const rec = new Recorder({ redact: !values['no-redact'], research: !!values.research });
+  const [cmd, a1, a2] = positionals;
+  switch (cmd) {
+    case 'hook': {
+      // Never block or fail the host agent.
+      try { handleHook(JSON.parse(await readStdin()), rec); } catch (e) { process.stderr.write(`agent-blackbox hook: ${(e as Error).message}\n`); }
+      process.exit(0);
+    }
+    case 'import-claude': {
+      if (!a1) throw new Error('usage: import-claude <transcript.jsonl>');
+      const r = importClaudeTranscript(a1, rec);
+      console.log(JSON.stringify({ ...r, files: exportSession(r.sessionId) }, null, 2));
+      break;
+    }
+    case 'codex': {
+      const file = values.latest || !a2 ? latestCodexSession() : a2;
+      if (!file) throw new Error('no Codex session file found (looked in ~/.codex/sessions)');
+      if (a1 === 'import') {
+        const r = importCodexSession(file, rec);
+        console.log(JSON.stringify({ ...r, files: exportSession(r.sessionId) }, null, 2));
+      } else if (a1 === 'tail') {
+        console.error(`tailing ${file} (Ctrl-C to stop)`);
+        const stop = tailCodexSession(file, rec, (n) => console.error(`+${n} events`));
+        process.on('SIGINT', () => { stop(); process.exit(0); });
+      } else throw new Error('usage: codex import|tail [file|--latest]');
+      break;
+    }
+    case 'mcp': {
+      const { runMcpStdio } = await import('./mcp.js');
+      await runMcpStdio(rec);
+      break;
+    }
+    case 'view': {
+      const { startViewer } = await import('./viewer.js');
+      const v = await startViewer({ port: values.port ? Number(values.port) : 4318 });
+      console.log(`agent-blackbox viewer: ${v.url}`);
+      break;
+    }
+    case 'export': {
+      if (!a1) throw new Error('usage: export <sessionId>');
+      const fmts = (values.format ? String(values.format).split(',') : ['jsonl', 'md', 'html']) as ExportFormat[];
+      console.log(exportSession(a1, fmts, values.out ? String(values.out) : undefined).join('\n'));
+      break;
+    }
+    case 'list':
+      for (const s of listSessions()) console.log(`${s.mtime}  ${String(s.size).padStart(8)}  ${s.id}`);
+      break;
+    case 'redact':
+      process.stdout.write(new Redactor({ rulesFile: loadRulesFile() }).redactString(await readStdin()));
+      break;
+    case 'init': {
+      const { runInit } = await import('./init.js');
+      runInit({ write: !!values.write });
+      break;
+    }
+    default:
+      console.log(HELP);
+      if (cmd && cmd !== 'help' && !values.help) process.exitCode = 1;
+  }
+}
+
+main().catch((e) => { console.error(`agent-blackbox: ${e.message}`); process.exit(1); });

@@ -1,0 +1,8 @@
+{
+  "rules": [
+    { "name": "TICKET", "pattern": "JIRA-\\d+" },
+    { "name": "INTERNAL_HOST", "pattern": "[a-z0-9-]+\\.corp\\.internal" }
+  ],
+  "disable": [],
+  "allow": ["noreply@example.com"]
+}

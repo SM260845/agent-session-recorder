@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><title>agent-blackbox claude-fixture-1</title><style>
+body{font:14px/1.45 system-ui,sans-serif;margin:0;background:#0f1115;color:#e6e6e6}
+header{padding:10px 16px;background:#171a21;border-bottom:1px solid #2a2f3a;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:16px;margin:0}
+select,label{font-size:13px}
+#meta{padding:8px 16px;color:#9aa4b2;font-size:12px}
+#timeline{padding:8px 16px 40px}
+.ev{border-left:3px solid #444;margin:6px 0;padding:6px 10px;background:#161920;border-radius:4px}
+.ev .h{font-size:12px;color:#9aa4b2;display:flex;gap:8px;flex-wrap:wrap}
+.ev .b{white-space:pre-wrap;word-break:break-word;margin-top:4px;font-family:ui-monospace,monospace;font-size:12.5px;max-height:420px;overflow:auto}
+.ev.user{border-color:#4f8cff}.ev.ai{border-color:#3ecf8e}.ev.tool{border-color:#f5a623}.ev.system{border-color:#888}
+.ev.reasoning{opacity:.85;font-style:italic}.ev.error,.err{border-color:#ff5c5c}
+.kids{margin-left:18px}
+.tag{background:#252a35;border-radius:3px;padding:0 5px}
+</style></head><body>
+<header><h1>agent-blackbox</h1>
+<label>actor <select id="fa"><option value="">all</option></select></label>
+<label>type <select id="ft"><option value="">all</option></select></label></header>
+<div id="meta"></div><div id="timeline"></div>
+<script>
+(function(){
+const state={events:[],actor:'',type:''};
+const $=s=>document.querySelector(s);
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function body(e){const p=e.payload||{};
+  if(typeof p.text==='string')return p.text;
+  if(e.type==='tool.call')return (p.name||'')+' '+JSON.stringify(p.input??p.args??{},null,2);
+  if(e.type==='tool.result'){const o=p.output??p.result;return (p.isError?'[error] ':'')+(p.durationMs!=null?'('+p.durationMs+' ms) ':'')+(typeof o==='string'?o:JSON.stringify(o,null,2))}
+  return JSON.stringify(p,null,2)}
+function card(e){const d=document.createElement('div');
+  d.className='ev '+e.actor+' '+e.type.replace('.','-')+(e.payload&&e.payload.isError?' err':'')+(e.type==='reasoning'?' reasoning':'');
+  d.innerHTML='<div class="h"><span class="tag">'+esc(e.actor)+'</span><b>'+esc(e.type)+'</b><span>'+esc(e.ts)+'</span>'+
+   (e.provider?'<span>'+esc(e.provider)+'</span>':'')+(e.reasoningSource?'<span class="tag">reasoning: '+esc(e.reasoningSource)+'</span>':'')+
+   '</div><div class="b">'+esc(body(e))+'</div><div class="kids"></div>';return d}
+function render(){const tl=$('#timeline');tl.innerHTML='';const byId={};
+  const vis=state.events.filter(e=>(!state.actor||e.actor===state.actor)&&(!state.type||e.type===state.type));
+  for(const e of vis){const c=card(e);byId[e.id]=c;const parent=e.parentId&&byId[e.parentId];
+    (parent?parent.querySelector('.kids'):tl).appendChild(c)}
+  const s=state.events.find(e=>e.type==='session.start');const end=state.events.find(e=>e.type==='session.end');
+  $('#meta').textContent=state.events.length?('session '+state.events[0].sessionId+' · '+state.events.length+' events'+(s&&s.payload.model?' · model '+s.payload.model:'')+(end&&end.payload.outcome?' · outcome '+end.payload.outcome:'')):'no events';}
+function opts(sel,vals){const cur=sel.value;sel.innerHTML='<option value="">all</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('');sel.value=cur}
+function refreshFilters(){opts($('#fa'),[...new Set(state.events.map(e=>e.actor))]);opts($('#ft'),[...new Set(state.events.map(e=>e.type))])}
+window.BB={set(evs){state.events=evs;refreshFilters();render()},add(e){state.events.push(e);refreshFilters();render()}};
+$('#fa').onchange=e=>{state.actor=e.target.value;render()};$('#ft').onchange=e=>{state.type=e.target.value;render()};
+})();
+</script>
+<script>BB.set([{"sessionId":"claude-fixture-1","actor":"system","type":"session.start","provider":"claude-code","ts":"2026-09-28T10:00:00.000Z","payload":{"source":"transcript","model":"claude-sonnet-4-5"},"attributes":{"gen_ai.system":"anthropic","gen_ai.conversation.id":"claude-fixture-1"},"id":"d0172d36-bee3-4ce5-8528-6cff7da43d84"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:00.000Z","actor":"user","type":"prompt","payload":{"text":"Fix the failing test. My email is [EMAIL_1]"},"id":"3bbf12cd-e3dd-421f-b29d-a557c18000dd"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:02.000Z","actor":"ai","type":"reasoning","reasoningSource":"summary","payload":{"text":"The test likely fails due to an off-by-one."},"id":"d03a6ca6-5190-4c5a-ace5-e4e7115505a0"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:02.000Z","actor":"ai","type":"reply","payload":{"text":"Let me look at the test file."},"attributes":{"gen_ai.system":"anthropic","gen_ai.response.model":"claude-sonnet-4-5"},"id":"7d827cc9-a9cb-405d-a9e6-293bd83ea961"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:02.000Z","id":"809682f0-a2b5-4a7a-a9ff-f073ea171625","actor":"ai","type":"tool.call","payload":{"name":"Read","input":{"file_path":"/home/[USER_1]/proj/test/a.test.ts"},"toolUseId":"toolu_01"},"attributes":{"gen_ai.system":"anthropic","gen_ai.tool.name":"Read","gen_ai.tool.call.id":"toolu_01"}},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:02.000Z","actor":"system","type":"usage","payload":{"model":"claude-sonnet-4-5","usage":{"input_tokens":120,"output_tokens":45}},"attributes":{"gen_ai.system":"anthropic","gen_ai.response.model":"claude-sonnet-4-5","gen_ai.usage.input_tokens":120,"gen_ai.usage.output_tokens":45},"id":"4caa6ca9-b944-4874-82e3-30c233acf1ee"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:03.500Z","parentId":"809682f0-a2b5-4a7a-a9ff-f073ea171625","actor":"tool","type":"tool.result","payload":{"output":"expect(sum(1,2)).toBe(4)","isError":false,"toolUseId":"toolu_01","durationMs":1500},"id":"0957d9c1-0e85-4c09-810f-077ea4a05c2c"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:05.000Z","actor":"ai","type":"reply","payload":{"text":"The expectation is wrong: 1+2 is 3. I fixed it."},"attributes":{"gen_ai.system":"anthropic","gen_ai.response.model":"claude-sonnet-4-5"},"id":"78c274ee-e95c-4571-b445-c262ed350fbf"},{"sessionId":"claude-fixture-1","provider":"claude-code","ts":"2026-09-28T10:00:05.000Z","actor":"system","type":"usage","payload":{"model":"claude-sonnet-4-5","usage":{"input_tokens":200,"output_tokens":20}},"attributes":{"gen_ai.system":"anthropic","gen_ai.response.model":"claude-sonnet-4-5","gen_ai.usage.input_tokens":200,"gen_ai.usage.output_tokens":20},"id":"c877bf1e-4f52-47c0-a8c0-8a7bce8e8ed8"},{"sessionId":"claude-fixture-1","actor":"system","type":"session.end","provider":"claude-code","ts":"2026-09-28T10:00:05.000Z","payload":{"outcome":"imported"},"id":"15985623-3447-4f78-93c2-db0a0acbb753"}]);</script>
+</body></html>

@@ -1,0 +1,53 @@
+{
+  "name": "agent-blackbox",
+  "version": "0.1.0",
+  "description": "Local-first flight recorder for AI coding/agent sessions (Claude Code, Codex CLI, MCP hosts). Redaction on by default.",
+  "type": "module",
+  "license": "MIT",
+  "author": "SM260845",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SM260845/agent-blackbox.git"
+  },
+  "bin": {
+    "agent-blackbox": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "schema",
+    "SKILL.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepare": "tsc -p tsconfig.json"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "claude-code",
+    "codex",
+    "mcp",
+    "observability",
+    "flight-recorder",
+    "redaction"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1",
+    "ws": "^8.22.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/ws": "^8.18.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.2"
+  }
+}

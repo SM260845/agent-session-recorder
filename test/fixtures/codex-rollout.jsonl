@@ -1,0 +1,10 @@
+{"timestamp":"2026-09-28T11:00:00.000Z","type":"session_meta","payload":{"id":"codex-fixture-1","timestamp":"2026-09-28T11:00:00.000Z","cwd":"/Users/bob/repo","originator":"codex_cli_rs","cli_version":"0.40.0","model_provider":"openai"}}
+{"timestamp":"2026-09-28T11:00:00.100Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"<environment_context>\n  <cwd>/Users/bob/repo</cwd>\n</environment_context>"}]}}
+{"timestamp":"2026-09-28T11:00:00.200Z","type":"turn_context","payload":{"cwd":"/Users/bob/repo","approval_policy":"on-request","sandbox_policy":{"mode":"workspace-write"},"model":"gpt-5-codex"}}
+{"timestamp":"2026-09-28T11:00:01.000Z","type":"response_item","payload":{"type":"message","role":"user","content":[{"type":"input_text","text":"List files. key is sk-proj-abcdefghijklmnopqrstuvwx123"}]}}
+{"timestamp":"2026-09-28T11:00:01.100Z","type":"event_msg","payload":{"type":"user_message","message":"List files."}}
+{"timestamp":"2026-09-28T11:00:02.000Z","type":"response_item","payload":{"type":"reasoning","summary":[{"type":"summary_text","text":"**Listing files** I'll run ls."}],"content":null,"encrypted_content":"gAAAAB..."}}
+{"timestamp":"2026-09-28T11:00:02.500Z","type":"response_item","payload":{"type":"function_call","name":"shell","arguments":"{\"command\":[\"ls\",\"-la\"]}","call_id":"call_1"}}
+{"timestamp":"2026-09-28T11:00:03.000Z","type":"response_item","payload":{"type":"function_call_output","call_id":"call_1","output":"{\"output\":\"README.md\\nsrc\\n\",\"metadata\":{\"exit_code\":0,\"duration_seconds\":0.1}}"}}
+{"timestamp":"2026-09-28T11:00:04.000Z","type":"response_item","payload":{"type":"message","role":"assistant","content":[{"type":"output_text","text":"There are two entries: README.md and src."}]}}
+{"timestamp":"2026-09-28T11:00:04.100Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":900,"output_tokens":60},"last_token_usage":{"input_tokens":500,"output_tokens":30}}}}

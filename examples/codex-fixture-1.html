@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><title>agent-blackbox codex-fixture-1</title><style>
+body{font:14px/1.45 system-ui,sans-serif;margin:0;background:#0f1115;color:#e6e6e6}
+header{padding:10px 16px;background:#171a21;border-bottom:1px solid #2a2f3a;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+header h1{font-size:16px;margin:0}
+select,label{font-size:13px}
+#meta{padding:8px 16px;color:#9aa4b2;font-size:12px}
+#timeline{padding:8px 16px 40px}
+.ev{border-left:3px solid #444;margin:6px 0;padding:6px 10px;background:#161920;border-radius:4px}
+.ev .h{font-size:12px;color:#9aa4b2;display:flex;gap:8px;flex-wrap:wrap}
+.ev .b{white-space:pre-wrap;word-break:break-word;margin-top:4px;font-family:ui-monospace,monospace;font-size:12.5px;max-height:420px;overflow:auto}
+.ev.user{border-color:#4f8cff}.ev.ai{border-color:#3ecf8e}.ev.tool{border-color:#f5a623}.ev.system{border-color:#888}
+.ev.reasoning{opacity:.85;font-style:italic}.ev.error,.err{border-color:#ff5c5c}
+.kids{margin-left:18px}
+.tag{background:#252a35;border-radius:3px;padding:0 5px}
+</style></head><body>
+<header><h1>agent-blackbox</h1>
+<label>actor <select id="fa"><option value="">all</option></select></label>
+<label>type <select id="ft"><option value="">all</option></select></label></header>
+<div id="meta"></div><div id="timeline"></div>
+<script>
+(function(){
+const state={events:[],actor:'',type:''};
+const $=s=>document.querySelector(s);
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function body(e){const p=e.payload||{};
+  if(typeof p.text==='string')return p.text;
+  if(e.type==='tool.call')return (p.name||'')+' '+JSON.stringify(p.input??p.args??{},null,2);
+  if(e.type==='tool.result'){const o=p.output??p.result;return (p.isError?'[error] ':'')+(p.durationMs!=null?'('+p.durationMs+' ms) ':'')+(typeof o==='string'?o:JSON.stringify(o,null,2))}
+  return JSON.stringify(p,null,2)}
+function card(e){const d=document.createElement('div');
+  d.className='ev '+e.actor+' '+e.type.replace('.','-')+(e.payload&&e.payload.isError?' err':'')+(e.type==='reasoning'?' reasoning':'');
+  d.innerHTML='<div class="h"><span class="tag">'+esc(e.actor)+'</span><b>'+esc(e.type)+'</b><span>'+esc(e.ts)+'</span>'+
+   (e.provider?'<span>'+esc(e.provider)+'</span>':'')+(e.reasoningSource?'<span class="tag">reasoning: '+esc(e.reasoningSource)+'</span>':'')+
+   '</div><div class="b">'+esc(body(e))+'</div><div class="kids"></div>';return d}
+function render(){const tl=$('#timeline');tl.innerHTML='';const byId={};
+  const vis=state.events.filter(e=>(!state.actor||e.actor===state.actor)&&(!state.type||e.type===state.type));
+  for(const e of vis){const c=card(e);byId[e.id]=c;const parent=e.parentId&&byId[e.parentId];
+    (parent?parent.querySelector('.kids'):tl).appendChild(c)}
+  const s=state.events.find(e=>e.type==='session.start');const end=state.events.find(e=>e.type==='session.end');
+  $('#meta').textContent=state.events.length?('session '+state.events[0].sessionId+' · '+state.events.length+' events'+(s&&s.payload.model?' · model '+s.payload.model:'')+(end&&end.payload.outcome?' · outcome '+end.payload.outcome:'')):'no events';}
+function opts(sel,vals){const cur=sel.value;sel.innerHTML='<option value="">all</option>'+vals.map(v=>'<option>'+esc(v)+'</option>').join('');sel.value=cur}
+function refreshFilters(){opts($('#fa'),[...new Set(state.events.map(e=>e.actor))]);opts($('#ft'),[...new Set(state.events.map(e=>e.type))])}
+window.BB={set(evs){state.events=evs;refreshFilters();render()},add(e){state.events.push(e);refreshFilters();render()}};
+$('#fa').onchange=e=>{state.actor=e.target.value;render()};$('#ft').onchange=e=>{state.type=e.target.value;render()};
+})();
+</script>
+<script>BB.set([{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:00.000Z","actor":"system","type":"session.start","payload":{"cwd":"/Users/[USER_1]/repo","cliVersion":"0.40.0","originator":"codex_cli_rs","modelProvider":"openai","source":"codex-rollout"},"attributes":{"gen_ai.system":"openai","gen_ai.conversation.id":"codex-fixture-1"},"id":"3c75ce1d-e9b8-4ee6-ae61-7b554ab18ec1"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:00.100Z","actor":"system","type":"note","payload":{"text":"\u003cenvironment_context>\n  \u003ccwd>/Users/[USER_1]/repo\u003c/cwd>\n\u003c/environment_context>"},"id":"acdb0813-370d-440b-8f8d-ff867efcd282"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:00.200Z","actor":"system","type":"note","payload":{"model":"gpt-5-codex","approvalPolicy":"on-request","sandbox":"workspace-write"},"attributes":{"gen_ai.system":"openai","gen_ai.request.model":"gpt-5-codex"},"id":"a7f6367d-4bf6-438f-a79a-8060d65c7a52"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:01.000Z","actor":"user","type":"prompt","payload":{"text":"List files. key is [API_KEY_1]"},"id":"c064242a-3360-4b04-89b9-39d7f85ea24b"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:02.000Z","actor":"ai","type":"reasoning","reasoningSource":"summary","payload":{"text":"**Listing files** I'll run ls.","encrypted":true},"id":"7cab6d1e-aabf-43ec-89e4-4a5eec4deeee"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:02.500Z","id":"03d7f503-d6e4-451e-816f-b40c567bac92","actor":"ai","type":"tool.call","payload":{"name":"shell","input":{"command":["ls","-la"]},"callId":"call_1"},"attributes":{"gen_ai.system":"openai","gen_ai.operation.name":"execute_tool","gen_ai.tool.name":"shell","gen_ai.tool.call.id":"call_1"}},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:03.000Z","parentId":"03d7f503-d6e4-451e-816f-b40c567bac92","actor":"tool","type":"tool.result","payload":{"output":{"output":"README.md\nsrc\n","metadata":{"exit_code":0,"duration_seconds":0.1}},"callId":"call_1","isError":false,"durationMs":500},"id":"41ca0609-8cde-4576-95cc-8d79e56e83e7"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:04.000Z","actor":"ai","type":"reply","payload":{"text":"There are two entries: README.md and src."},"attributes":{"gen_ai.system":"openai","gen_ai.response.model":"gpt-5-codex"},"id":"2d562337-2de6-46d7-84c6-cceeff361efe"},{"sessionId":"codex-fixture-1","provider":"codex-cli","ts":"2026-09-28T11:00:04.100Z","actor":"system","type":"usage","payload":{"usage":{"total_token_usage":{"input_tokens":900,"output_tokens":60},"last_token_usage":{"input_tokens":500,"output_tokens":30}}},"attributes":{"gen_ai.system":"openai","gen_ai.response.model":"gpt-5-codex","gen_ai.usage.input_tokens":500,"gen_ai.usage.output_tokens":30},"id":"0fd8003c-3b1b-4d40-9ec3-a9427cc6a5f8"},{"sessionId":"codex-fixture-1","provider":"codex-cli","actor":"system","type":"session.end","ts":"2026-09-28T11:00:04.100Z","payload":{"outcome":"imported"},"id":"f910b761-51b5-4560-a40e-4369d48dda1b"}]);</script>
+</body></html>
