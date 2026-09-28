@@ -12,7 +12,7 @@ beforeEach(() => { tmpHome(); });
 
 describe('claude code hooks', () => {
   it('records prompt, nested tool call/result with timing, replies on Stop, and auto-exports', () => {
-    const home = process.env.AGENT_BLACKBOX_HOME!;
+    const home = process.env.AGENT_SESSION_RECORDER_HOME!;
     const sid = 'hook-s1';
     const base = { session_id: sid, cwd: '/home/alice/p', transcript_path: fixture('claude-transcript.jsonl') };
     handleHook({ ...base, hook_event_name: 'UserPromptSubmit', prompt: 'deploy with key xai-ABCDEFGHIJKLMNOPQRSTUVWX' });
@@ -76,7 +76,7 @@ describe('codex import/tail', () => {
     expect(e.reasoningSource).toBe('none');
   });
   it('tails appended lines', async () => {
-    const f = path.join(process.env.AGENT_BLACKBOX_HOME!, 'rollout.jsonl');
+    const f = path.join(process.env.AGENT_SESSION_RECORDER_HOME!, 'rollout.jsonl');
     const lines = fs.readFileSync(fixture('codex-rollout.jsonl'), 'utf8').split('\n');
     fs.writeFileSync(f, lines.slice(0, 4).join('\n') + '\n');
     const stop = tailCodexSession(f, new Recorder(), undefined, 20);

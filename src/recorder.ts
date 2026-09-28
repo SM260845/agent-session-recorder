@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { Redactor, loadRulesFile, shrink, type RedactorState } from './redact.js';
 import { appendEvent, loadState, saveState, sessionFile } from './store.js';
-import type { BlackboxEvent, EventInput } from './schema.js';
+import type { SessionEvent, EventInput } from './schema.js';
 
 export interface RecorderOptions {
   /** Redaction is ON unless explicitly disabled (CLI: --no-redact) */
@@ -36,16 +36,16 @@ export class Recorder {
   }
 
   /** Record events for a single session; applies redaction/research, then appends. */
-  record(input: EventInput | EventInput[], stateOverride?: SessionState): BlackboxEvent[] {
+  record(input: EventInput | EventInput[], stateOverride?: SessionState): SessionEvent[] {
     const inputs = Array.isArray(input) ? input : [input];
     if (!inputs.length) return [];
     const sessionId = inputs[0].sessionId;
     const st = stateOverride ?? this.state(sessionId);
     const redactor = this.opts.redact === false ? null : new Redactor({ state: st.redactor, rulesFile: loadRulesFile() });
     const seen = new Set(st.seen);
-    const out: BlackboxEvent[] = [];
+    const out: SessionEvent[] = [];
     for (const i of inputs) {
-      let e: BlackboxEvent = { ...i, id: i.id ?? newId(), ts: i.ts ?? new Date().toISOString() };
+      let e: SessionEvent = { ...i, id: i.id ?? newId(), ts: i.ts ?? new Date().toISOString() };
       if (this.opts.research && (e.type === 'tool.result' || e.type === 'tool.call')) {
         e = { ...e, payload: shrink(e.payload, seen, { maxBytes: this.opts.maxBytes }) as Record<string, unknown> };
       }

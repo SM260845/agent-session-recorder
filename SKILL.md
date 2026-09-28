@@ -1,11 +1,11 @@
 ---
-name: agent-blackbox
-description: Log your plan, key decisions and outcome to the agent-blackbox flight recorder via its MCP tools so humans can audit the session later.
+name: agent-session-recorder
+description: Log your plan, key decisions and outcome to the agent-session-recorder flight recorder via its MCP tools so humans can audit the session later.
 ---
 
-# agent-blackbox: flight-recorder logging
+# agent-session-recorder: flight-recorder logging
 
-You can use the `agent-blackbox` MCP server. It **only records what you send it**. It cannot see your
+You can use the `agent-session-recorder` MCP server. It **only records what you send it**. It cannot see your
 hidden reasoning, and you should never make up or rebuild hidden chain-of-thought.
 
 ## When to log
@@ -19,7 +19,7 @@ hidden reasoning, and you should never make up or rebuild hidden chain-of-though
 5. **Reasoning.** Only log reasoning text the provider actually exposed to you. Set `reasoningSource`
    to `full`, `summary` or `none`. If you are unsure, don't log reasoning. Log a `decision` instead.
 6. **End.** Call `end_session` with an `outcome` (`success`, `partial`, `failed`, `abandoned`). This
-   auto-exports JSONL, Markdown and HTML to `~/.agent-blackbox/exports/`.
+   auto-exports JSONL, Markdown and HTML to `~/.agent-session-recorder/exports/`.
 
 ## Rules
 

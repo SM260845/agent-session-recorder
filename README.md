@@ -1,11 +1,11 @@
-# agent-blackbox
+# agent-session-recorder
 
 **A local-first flight recorder for AI coding and agent sessions.** It records what happened in a
 session (prompts, visible replies, reasoning the provider exposed, tool calls with args, results,
 timing and errors, decisions, and session metadata) as one normalized JSONL timeline. You can
 export it to Markdown or a self-contained HTML file, or watch it live in a small local viewer.
 
-- **Local-first.** Everything goes to `~/.agent-blackbox/`. There is no network, telemetry or cloud.
+- **Local-first.** Everything goes to `~/.agent-session-recorder/`. There is no network, telemetry or cloud.
 - **Redaction is always on** unless you pass `--no-redact`. It runs *before* anything is written or streamed.
 - **Honest about reasoning.** Only provider-exposed reasoning is stored, and each entry is labelled
   `reasoningSource: full | summary | none`. We never claim to capture hidden chain-of-thought.
@@ -17,26 +17,26 @@ export it to Markdown or a self-contained HTML file, or watch it live in a small
 
 ## Quickstart
 
-Not published to npm yet. Note that the npm name `agent-blackbox` is already taken by an unrelated package.
+Not published to npm yet. The npm name `agent-session-recorder` is reserved-pending for this project (currently unclaimed); npm installation will be viable after publication.
 
 ```bash
-git clone https://github.com/SM260845/agent-blackbox && cd agent-blackbox
-npm ci && npm run build && npm link      # provides the `agent-blackbox` command
-agent-blackbox init                      # dry-run: detects claude/codex and prints the config
-agent-blackbox init --write              # merges hooks into ~/.claude/settings.json (+ .bak) and adds MCP to ~/.codex/config.toml
-agent-blackbox view                      # http://127.0.0.1:4318 live timeline
+git clone https://github.com/SM260845/agent-session-recorder && cd agent-session-recorder
+npm ci && npm run build && npm link      # provides the `agent-session-recorder` command
+agent-session-recorder init                      # dry-run: detects claude/codex and prints the config
+agent-session-recorder init --write              # merges hooks into ~/.claude/settings.json (+ .bak) and adds MCP to ~/.codex/config.toml
+agent-session-recorder view                      # http://127.0.0.1:4318 live timeline
 ```
 
 | Command | What it does |
 |---|---|
-| `agent-blackbox hook` | Claude Code hook handler (reads hook JSON on stdin; never blocks the agent) |
-| `agent-blackbox import-claude <file>` | Import a `~/.claude/projects/*/*.jsonl` transcript |
-| `agent-blackbox codex import <file\|--latest>` | Import a Codex rollout from `~/.codex/sessions/**/rollout-*.jsonl` |
-| `agent-blackbox codex tail [--latest]` | Follow a live Codex session file |
-| `agent-blackbox mcp` | MCP server on stdio (`start_session`, `log_event`, `end_session`, `export`; resource `blackbox://session/current`) |
-| `agent-blackbox export <id> [--format md,html,jsonl] [--out dir]` | Export a session |
-| `agent-blackbox view [--port N]` | Local HTTP + WebSocket viewer with nested tool calls and actor/type filters |
-| `agent-blackbox list` / `redact` | List sessions / redact stdin (to test your rules) |
+| `agent-session-recorder hook` | Claude Code hook handler (reads hook JSON on stdin; never blocks the agent) |
+| `agent-session-recorder import-claude <file>` | Import a `~/.claude/projects/*/*.jsonl` transcript |
+| `agent-session-recorder codex import <file\|--latest>` | Import a Codex rollout from `~/.codex/sessions/**/rollout-*.jsonl` |
+| `agent-session-recorder codex tail [--latest]` | Follow a live Codex session file |
+| `agent-session-recorder mcp` | MCP server on stdio (`start_session`, `log_event`, `end_session`, `export`; resource `session-recorder://session/current`) |
+| `agent-session-recorder export <id> [--format md,html,jsonl] [--out dir]` | Export a session |
+| `agent-session-recorder view [--port N]` | Local HTTP + WebSocket viewer with nested tool calls and actor/type filters |
+| `agent-session-recorder list` / `redact` | List sessions / redact stdin (to test your rules) |
 
 Flags: `--no-redact` and `--research`. Research mode truncates big tool outputs to `{sha256, size, head}`
 and replaces repeated file dumps with `{duplicateOf}`.
@@ -68,7 +68,7 @@ TypeScript: [`src/schema.ts`](src/schema.ts). JSON Schema: [`schema/event.schema
 - `type` is one of `session.start | session.end | prompt | reply | reasoning | tool.call | tool.result | plan | decision | note | usage | error`.
 - `attributes` follow the OpenTelemetry GenAI conventions (`gen_ai.system`, `gen_ai.request.model`,
   `gen_ai.usage.input_tokens`, `gen_ai.tool.name`, `gen_ai.tool.call.id`, …).
-- Storage is one JSONL file per session in `~/.agent-blackbox/sessions/`. Exports go to `~/.agent-blackbox/exports/`,
+- Storage is one JSONL file per session in `~/.agent-session-recorder/sessions/`. Exports go to `~/.agent-session-recorder/exports/`,
   and are written automatically on `Stop`/`SessionEnd` hooks and on MCP `end_session`.
 
 ## Privacy and redaction
@@ -85,7 +85,7 @@ Built-in regex rules produce typed, consistent placeholders (`[EMAIL_1]`, `[API_
 Placeholders stay consistent across hook invocations in a session. Only a **salted hash → placeholder** map is
 persisted, never the raw values. Files are created with mode `0600`.
 
-You can edit the rules in `~/.agent-blackbox/redact-rules.json`. See [`examples/redact-rules.example.json`](examples/redact-rules.example.json):
+You can edit the rules in `~/.agent-session-recorder/redact-rules.json`. See [`examples/redact-rules.example.json`](examples/redact-rules.example.json):
 `rules` (custom regexes, which run first), `disable` (built-in rule names) and `allow` (literal values to keep).
 
 Regex redaction is best-effort. Review exports before sharing them. Local NER redaction is on the roadmap.

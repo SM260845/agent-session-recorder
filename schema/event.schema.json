@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/SM260845/agent-blackbox/schema/event.schema.json",
-  "title": "agent-blackbox event",
+  "$id": "https://github.com/SM260845/agent-session-recorder/schema/event.schema.json",
+  "title": "agent-session-recorder event",
   "type": "object",
   "required": ["id", "ts", "sessionId", "actor", "type", "payload"],
   "properties": {

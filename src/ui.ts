@@ -59,7 +59,7 @@ export function renderPage(opts: { title: string; events?: unknown[]; live?: boo
   const data = JSON.stringify(opts.events ?? []).replace(/</g, '\\u003c');
   const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
   return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(opts.title)}</title><style>${CSS}</style></head><body>
-<header><h1>agent-blackbox</h1>${opts.live ? '<label>session <select id="sess"></select></label>' : ''}
+<header><h1>agent-session-recorder</h1>${opts.live ? '<label>session <select id="sess"></select></label>' : ''}
 <label>actor <select id="fa"><option value="">all</option></select></label>
 <label>type <select id="ft"><option value="">all</option></select></label></header>
 <div id="meta"></div><div id="timeline"></div>

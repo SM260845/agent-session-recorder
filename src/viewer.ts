@@ -10,7 +10,7 @@ export function startViewer(opts: { port?: number; host?: string; pollMs?: numbe
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://x');
     const json = (v: unknown) => { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify(v)); };
-    if (url.pathname === '/') { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(renderPage({ title: 'agent-blackbox viewer', live: true })); return; }
+    if (url.pathname === '/') { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(renderPage({ title: 'agent-session-recorder viewer', live: true })); return; }
     if (url.pathname === '/api/sessions') return json(listSessions());
     const m = url.pathname.match(/^\/api\/sessions\/([^/]+)$/);
     if (m) return json(readSession(decodeURIComponent(m[1])));

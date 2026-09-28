@@ -1,4 +1,4 @@
-# agent-blackbox session `claude-fixture-1`
+# agent-session-recorder session `claude-fixture-1`
 
 | field | value |
 |---|---|

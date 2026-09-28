@@ -13,7 +13,7 @@ import { ACTORS, EVENT_TYPES, type Actor, type EventType } from './schema.js';
 const text = (t: string) => ({ content: [{ type: 'text' as const, text: t }] });
 
 export function createMcpServer(rec = new Recorder()): McpServer {
-  const server = new McpServer({ name: 'agent-blackbox', version: '0.1.0' });
+  const server = new McpServer({ name: 'agent-session-recorder', version: '0.1.0' });
   const resolve = (id?: string) => {
     const s = id || getCurrentSession();
     if (!s) throw new Error('no active session: call start_session first');
@@ -64,7 +64,7 @@ export function createMcpServer(rec = new Recorder()): McpServer {
     inputSchema: { sessionId: z.string().optional(), format: z.enum(['jsonl', 'md', 'html']).default('md') },
   }, async ({ sessionId, format }) => text(render(readSession(resolve(sessionId)), (format ?? 'md') as ExportFormat)));
 
-  server.registerResource('current-session', 'blackbox://session/current', {
+  server.registerResource('current-session', 'session-recorder://session/current', {
     description: 'Events of the current session as JSONL', mimeType: 'application/x-ndjson',
   }, async (uri) => {
     const id = getCurrentSession();

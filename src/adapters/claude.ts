@@ -1,6 +1,6 @@
 /**
  * Claude Code adapter.
- * - Hook handler: `agent-blackbox hook` reads the hook JSON Claude Code writes to stdin
+ * - Hook handler: `agent-session-recorder hook` reads the hook JSON Claude Code writes to stdin
  *   (fields: session_id, transcript_path, cwd, hook_event_name, prompt, tool_name, tool_input,
  *   tool_response, tool_use_id). Supported: SessionStart, UserPromptSubmit, PreToolUse,
  *   PostToolUse, Stop, SessionEnd.

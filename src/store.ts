@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { BlackboxEvent } from './schema.js';
+import type { SessionEvent } from './schema.js';
 
 export function homeDir(): string {
-  return process.env.AGENT_BLACKBOX_HOME || path.join(os.homedir(), '.agent-blackbox');
+  return process.env.AGENT_SESSION_RECORDER_HOME || path.join(os.homedir(), '.agent-session-recorder');
 }
 export const sessionsDir = () => path.join(homeDir(), 'sessions');
 export const exportsDir = () => path.join(homeDir(), 'exports');
@@ -18,15 +18,15 @@ export function ensureDirs(): void {
   fs.mkdirSync(exportsDir(), { recursive: true, mode: 0o700 });
 }
 
-export function appendEvent(e: BlackboxEvent): void {
+export function appendEvent(e: SessionEvent): void {
   ensureDirs();
   fs.appendFileSync(sessionFile(e.sessionId), JSON.stringify(e) + '\n', { mode: 0o600 });
 }
 
-export function readSession(id: string): BlackboxEvent[] {
+export function readSession(id: string): SessionEvent[] {
   const f = sessionFile(id);
   if (!fs.existsSync(f)) return [];
-  return parseJsonl(fs.readFileSync(f, 'utf8')) as BlackboxEvent[];
+  return parseJsonl(fs.readFileSync(f, 'utf8')) as SessionEvent[];
 }
 
 export function parseJsonl(text: string): unknown[] {

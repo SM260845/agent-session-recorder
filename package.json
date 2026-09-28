@@ -1,5 +1,5 @@
 {
-  "name": "agent-blackbox",
+  "name": "agent-session-recorder",
   "version": "0.1.0",
   "description": "Local-first flight recorder for AI coding/agent sessions (Claude Code, Codex CLI, MCP hosts). Redaction on by default.",
   "type": "module",
@@ -7,10 +7,10 @@
   "author": "SM260845",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SM260845/agent-blackbox.git"
+    "url": "git+https://github.com/SM260845/agent-session-recorder.git"
   },
   "bin": {
-    "agent-blackbox": "dist/cli.js"
+    "agent-session-recorder": "dist/cli.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

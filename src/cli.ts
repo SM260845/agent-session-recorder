@@ -7,22 +7,22 @@ import { exportSession, type ExportFormat } from './exporters.js';
 import { listSessions } from './store.js';
 import { Redactor, loadRulesFile } from './redact.js';
 
-const HELP = `agent-blackbox — local-first flight recorder for AI agent sessions
+const HELP = `agent-session-recorder — local-first flight recorder for AI agent sessions
 
 Usage:
-  agent-blackbox init [--write]                 detect claude/codex, print (or write) hook + MCP config
-  agent-blackbox hook                           Claude Code hook handler (reads hook JSON on stdin)
-  agent-blackbox import-claude <transcript.jsonl>
-  agent-blackbox codex import <rollout.jsonl|--latest>
-  agent-blackbox codex tail [rollout.jsonl|--latest]
-  agent-blackbox mcp                            run the MCP server on stdio
-  agent-blackbox view [--port 4318]             local live viewer (127.0.0.1)
-  agent-blackbox export <sessionId> [--format md|html|jsonl] [--out dir]
-  agent-blackbox list                           list recorded sessions
-  agent-blackbox redact                         redact stdin -> stdout (test your rules)
+  agent-session-recorder init [--write]                 detect claude/codex, print (or write) hook + MCP config
+  agent-session-recorder hook                           Claude Code hook handler (reads hook JSON on stdin)
+  agent-session-recorder import-claude <transcript.jsonl>
+  agent-session-recorder codex import <rollout.jsonl|--latest>
+  agent-session-recorder codex tail [rollout.jsonl|--latest]
+  agent-session-recorder mcp                            run the MCP server on stdio
+  agent-session-recorder view [--port 4318]             local live viewer (127.0.0.1)
+  agent-session-recorder export <sessionId> [--format md|html|jsonl] [--out dir]
+  agent-session-recorder list                           list recorded sessions
+  agent-session-recorder redact                         redact stdin -> stdout (test your rules)
 
 Global flags: --no-redact (disable redaction; ON by default), --research (truncate big/repeated tool output)
-Data: ~/.agent-blackbox (override with AGENT_BLACKBOX_HOME)`;
+Data: ~/.agent-session-recorder (override with AGENT_SESSION_RECORDER_HOME)`;
 
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = [];
@@ -43,7 +43,7 @@ async function main() {
   switch (cmd) {
     case 'hook': {
       // Never block or fail the host agent.
-      try { handleHook(JSON.parse(await readStdin()), rec); } catch (e) { process.stderr.write(`agent-blackbox hook: ${(e as Error).message}\n`); }
+      try { handleHook(JSON.parse(await readStdin()), rec); } catch (e) { process.stderr.write(`agent-session-recorder hook: ${(e as Error).message}\n`); }
       process.exit(0);
     }
     case 'import-claude': {
@@ -73,7 +73,7 @@ async function main() {
     case 'view': {
       const { startViewer } = await import('./viewer.js');
       const v = await startViewer({ port: values.port ? Number(values.port) : 4318 });
-      console.log(`agent-blackbox viewer: ${v.url}`);
+      console.log(`agent-session-recorder viewer: ${v.url}`);
       break;
     }
     case 'export': {
@@ -99,4 +99,4 @@ async function main() {
   }
 }
 
-main().catch((e) => { console.error(`agent-blackbox: ${e.message}`); process.exit(1); });
+main().catch((e) => { console.error(`agent-session-recorder: ${e.message}`); process.exit(1); });

@@ -1,4 +1,4 @@
-/** Normalized agent-blackbox event schema (v1). See schema/event.schema.json. */
+/** Normalized agent-session-recorder event schema (v1). See schema/event.schema.json. */
 export type Actor = 'user' | 'ai' | 'tool' | 'system';
 
 export type EventType =
@@ -37,7 +37,7 @@ export interface GenAiAttributes {
   [key: string]: string | number | boolean | undefined;
 }
 
-export interface BlackboxEvent {
+export interface SessionEvent {
   /** Unique event id */
   id: string;
   /** Parent event id (e.g. tool.result -> tool.call) */
@@ -54,7 +54,7 @@ export interface BlackboxEvent {
   attributes?: GenAiAttributes;
 }
 
-export type EventInput = Omit<BlackboxEvent, 'id' | 'ts'> & { id?: string; ts?: string };
+export type EventInput = Omit<SessionEvent, 'id' | 'ts'> & { id?: string; ts?: string };
 
 export const ACTORS: Actor[] = ['user', 'ai', 'tool', 'system'];
 export const EVENT_TYPES: EventType[] = [

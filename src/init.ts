@@ -37,7 +37,7 @@ export function mergeHooks(existing: any, add: any): any {
 }
 
 export function codexMcpToml(cmd = 'node', args = [cliPath(), 'mcp']): string {
-  return `[mcp_servers.agent-blackbox]\ncommand = ${JSON.stringify(cmd)}\nargs = ${JSON.stringify(args)}\n`;
+  return `[mcp_servers.agent-session-recorder]\ncommand = ${JSON.stringify(cmd)}\nargs = ${JSON.stringify(args)}\n`;
 }
 
 export function runInit(opts: { write?: boolean; home?: string; log?: (s: string) => void } = {}): { claude: boolean; codex: boolean; written: string[] } {
@@ -46,17 +46,17 @@ export function runInit(opts: { write?: boolean; home?: string; log?: (s: string
   const claude = detect('claude');
   const codex = detect('codex');
   const written: string[] = [];
-  log(`agent-blackbox init (${opts.write ? 'WRITE' : 'dry-run; pass --write to apply'})`);
+  log(`agent-session-recorder init (${opts.write ? 'WRITE' : 'dry-run; pass --write to apply'})`);
   log(`detected: claude=${claude ? 'yes' : 'no'} codex=${codex ? 'yes' : 'no'}\n`);
 
   const hooks = claudeHooksConfig();
   const claudeSettings = path.join(home, '.claude', 'settings.json');
   log(`# Claude Code hooks -> ${claudeSettings}`);
   log(JSON.stringify(hooks, null, 2));
-  log(`\n# Claude Code MCP (optional, run yourself):\nclaude mcp add agent-blackbox -- node ${cliPath()} mcp\n`);
+  log(`\n# Claude Code MCP (optional, run yourself):\nclaude mcp add agent-session-recorder -- node ${cliPath()} mcp\n`);
   const codexToml = path.join(home, '.codex', 'config.toml');
   log(`# Codex CLI MCP -> ${codexToml}\n${codexMcpToml()}`);
-  log('# Codex CLI has no hooks: record sessions with `agent-blackbox codex tail --latest` or `codex import <rollout.jsonl>`\n');
+  log('# Codex CLI has no hooks: record sessions with `agent-session-recorder codex tail --latest` or `codex import <rollout.jsonl>`\n');
 
   if (opts.write) {
     fs.mkdirSync(path.dirname(claudeSettings), { recursive: true });
@@ -68,7 +68,7 @@ export function runInit(opts: { write?: boolean; home?: string; log?: (s: string
     fs.writeFileSync(claudeSettings, JSON.stringify(mergeHooks(existing, hooks), null, 2) + '\n');
     written.push(claudeSettings);
     const prev = fs.existsSync(codexToml) ? fs.readFileSync(codexToml, 'utf8') : '';
-    if (!prev.includes('[mcp_servers.agent-blackbox]')) {
+    if (!prev.includes('[mcp_servers.agent-session-recorder]')) {
       fs.mkdirSync(path.dirname(codexToml), { recursive: true });
       if (prev) fs.copyFileSync(codexToml, codexToml + '.bak');
       fs.writeFileSync(codexToml, prev + (prev && !prev.endsWith('\n') ? '\n' : '') + '\n' + codexMcpToml());

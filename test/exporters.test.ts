@@ -11,7 +11,7 @@ describe('exporters', () => {
   it('renders markdown with metadata and nested tool results', () => {
     const { sessionId } = importClaudeTranscript(fixture('claude-transcript.jsonl'));
     const md = toMarkdown(readSession(sessionId));
-    expect(md).toContain('# agent-blackbox session `claude-fixture-1`');
+    expect(md).toContain('# agent-session-recorder session `claude-fixture-1`');
     expect(md).toContain('| model | claude-sonnet-4-5 |');
     expect(md).toMatch(/#### tool · tool.result/);
     expect(md).toContain('reasoning: summary');

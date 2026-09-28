@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { BlackboxEvent } from './schema.js';
+import type { SessionEvent } from './schema.js';
 import { exportsDir, readSession, safeId, ensureDirs } from './store.js';
 import { renderPage } from './ui.js';
 
 export type ExportFormat = 'jsonl' | 'md' | 'html';
 
-export function toJsonl(events: BlackboxEvent[]): string {
+export function toJsonl(events: SessionEvent[]): string {
   return events.map((e) => JSON.stringify(e)).join('\n') + (events.length ? '\n' : '');
 }
 
@@ -15,7 +15,7 @@ function fence(s: string): string {
   return `${ticks}\n${s}\n${ticks}`;
 }
 
-function describe(e: BlackboxEvent): string {
+function describe(e: SessionEvent): string {
   const p = e.payload as Record<string, unknown>;
   if (typeof p.text === 'string') return p.text;
   if (e.type === 'tool.call') return fence(`${p.name ?? ''} ${JSON.stringify(p.input ?? p.args ?? {}, null, 2)}`);
@@ -27,12 +27,12 @@ function describe(e: BlackboxEvent): string {
   return fence(JSON.stringify(p, null, 2));
 }
 
-export function toMarkdown(events: BlackboxEvent[]): string {
-  if (!events.length) return '# agent-blackbox session\n\n_No events._\n';
+export function toMarkdown(events: SessionEvent[]): string {
+  if (!events.length) return '# agent-session-recorder session\n\n_No events._\n';
   const start = events.find((e) => e.type === 'session.start');
   const end = events.find((e) => e.type === 'session.end');
   const sp = (start?.payload ?? {}) as Record<string, unknown>;
-  const lines = [`# agent-blackbox session \`${events[0].sessionId}\``, ''];
+  const lines = [`# agent-session-recorder session \`${events[0].sessionId}\``, ''];
   lines.push('| field | value |', '|---|---|');
   const rows: [string, unknown][] = [
     ['provider', start?.provider ?? events[0].provider], ['model', sp.model], ['cwd', sp.cwd],
@@ -41,10 +41,10 @@ export function toMarkdown(events: BlackboxEvent[]): string {
   ];
   for (const [k, v] of rows) if (v !== undefined && v !== null && v !== '') lines.push(`| ${k} | ${String(v).replace(/\|/g, '\\|')} |`);
   lines.push('');
-  const children = new Map<string, BlackboxEvent[]>();
+  const children = new Map<string, SessionEvent[]>();
   const ids = new Set(events.map((e) => e.id));
   for (const e of events) if (e.parentId && ids.has(e.parentId)) children.set(e.parentId, [...(children.get(e.parentId) ?? []), e]);
-  const emit = (e: BlackboxEvent, depth: number) => {
+  const emit = (e: SessionEvent, depth: number) => {
     const h = '#'.repeat(Math.min(3 + depth, 6));
     const rs = e.reasoningSource ? ` · reasoning: ${e.reasoningSource}` : '';
     lines.push(`${h} ${e.actor} · ${e.type} · ${e.ts}${rs}`, '', describe(e), '');
@@ -54,11 +54,11 @@ export function toMarkdown(events: BlackboxEvent[]): string {
   return lines.join('\n');
 }
 
-export function toHtml(events: BlackboxEvent[]): string {
-  return renderPage({ title: `agent-blackbox ${events[0]?.sessionId ?? ''}`, events });
+export function toHtml(events: SessionEvent[]): string {
+  return renderPage({ title: `agent-session-recorder ${events[0]?.sessionId ?? ''}`, events });
 }
 
-export function render(events: BlackboxEvent[], format: ExportFormat): string {
+export function render(events: SessionEvent[], format: ExportFormat): string {
   if (format === 'jsonl') return toJsonl(events);
   if (format === 'md') return toMarkdown(events);
   if (format === 'html') return toHtml(events);

@@ -22,7 +22,7 @@ describe('mcp server', () => {
     const start = await client.callTool({ name: 'start_session', arguments: { title: 't', model: 'grok-4' } });
     const { sessionId } = JSON.parse((start.content as any)[0].text);
     await client.callTool({ name: 'log_event', arguments: { actor: 'ai', type: 'decision', text: 'email ops@corp.com about it' } });
-    const res = await client.readResource({ uri: 'blackbox://session/current' });
+    const res = await client.readResource({ uri: 'session-recorder://session/current' });
     const txt = (res.contents[0] as any).text as string;
     expect(txt).toContain('[EMAIL_1]');
     expect(txt).toContain(sessionId);
@@ -42,7 +42,7 @@ describe('viewer', () => {
     rec.record({ sessionId: 'live', actor: 'user', type: 'prompt', payload: { text: 'hi' } });
     const v = await startViewer({ port: 0, pollMs: 20 });
     try {
-      expect(await (await fetch(v.url + '/')).text()).toContain('agent-blackbox');
+      expect(await (await fetch(v.url + '/')).text()).toContain('agent-session-recorder');
       expect((await (await fetch(v.url + '/api/sessions')).json())[0].id).toBe('live');
       expect(await (await fetch(v.url + '/api/sessions/live')).json()).toHaveLength(1);
       const ws = new WebSocket(v.url.replace('http', 'ws') + '/ws?session=live');
@@ -57,7 +57,7 @@ describe('viewer', () => {
 
 describe('init', () => {
   it('dry-run writes nothing; --write merges idempotently', () => {
-    const home = process.env.AGENT_BLACKBOX_HOME!;
+    const home = process.env.AGENT_SESSION_RECORDER_HOME!;
     const logs: string[] = [];
     expect(runInit({ home, log: (s) => logs.push(s) }).written).toEqual([]);
     expect(logs.join('\n')).toContain('UserPromptSubmit');
@@ -66,7 +66,7 @@ describe('init', () => {
     runInit({ home, write: true, log: () => {} });
     const s = JSON.parse(fs.readFileSync(home + '/.claude/settings.json', 'utf8'));
     expect(s.hooks.PreToolUse).toHaveLength(1);
-    expect(fs.readFileSync(home + '/.codex/config.toml', 'utf8').match(/mcp_servers.agent-blackbox/g)).toHaveLength(1);
+    expect(fs.readFileSync(home + '/.codex/config.toml', 'utf8').match(/mcp_servers.agent-session-recorder/g)).toHaveLength(1);
     const merged = mergeHooks({ hooks: { Stop: [{ hooks: [{ type: 'command', command: 'other' }] }] } }, claudeHooksConfig('x hook'));
     expect(merged.hooks.Stop).toHaveLength(2);
   });

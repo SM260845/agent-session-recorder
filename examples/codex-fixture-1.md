@@ -1,4 +1,4 @@
-# agent-blackbox session `codex-fixture-1`
+# agent-session-recorder session `codex-fixture-1`
 
 | field | value |
 |---|---|
