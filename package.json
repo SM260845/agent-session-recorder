@@ -4,10 +4,10 @@
   "description": "Local-first flight recorder for AI coding/agent sessions (Claude Code, Codex CLI, MCP hosts). Redaction on by default.",
   "type": "module",
   "license": "MIT",
-  "author": "SM260845",
+  "author": "ao3575911",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SM260845/agent-session-recorder.git"
+    "url": "git+https://github.com/ao3575911/agent-session-recorder.git"
   },
   "bin": {
     "agent-session-recorder": "dist/cli.js"

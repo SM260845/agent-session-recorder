@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/SM260845/agent-session-recorder/schema/event.schema.json",
+  "$id": "https://github.com/ao3575911/agent-session-recorder/schema/event.schema.json",
   "title": "agent-session-recorder event",
   "type": "object",
   "required": [

@@ -8,7 +8,7 @@ body:
       value: |
         ## 🛑 Stop. Do NOT paste real secrets, keys, emails, or personal data here.
         This issue is public. If a **real** value leaked into your files, rotate it now and
-        [report privately](https://github.com/SM260845/agent-session-recorder/security/advisories/new) instead.
+        [report privately](https://github.com/ao3575911/agent-session-recorder/security/advisories/new) instead.
   - type: input
     id: kind
     attributes:

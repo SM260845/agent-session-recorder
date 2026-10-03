@@ -5,7 +5,7 @@ Thanks for stopping by. This project is small on purpose, so a focused PR can la
 ## Setup
 
 ```bash
-git clone https://github.com/SM260845/agent-session-recorder && cd agent-session-recorder
+git clone https://github.com/ao3575911/agent-session-recorder && cd agent-session-recorder
 npm ci          # Node >= 22.12
 npm run build   # tsc -> dist/
 npm test        # vitest

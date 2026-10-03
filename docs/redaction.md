@@ -29,6 +29,6 @@ Test your rules with `echo 'text' | agent-session-recorder redact`.
 
 ## Limits and reporting
 
-This is regex matching, so it's best-effort. Names, addresses, and free-form secrets can slip through. Local NER is planned ([#4](https://github.com/SM260845/agent-session-recorder/issues/4)). Review exports before you share them.
+This is regex matching, so it's best-effort. Names, addresses, and free-form secrets can slip through. Local NER is planned ([#4](https://github.com/ao3575911/agent-session-recorder/issues/4)). Review exports before you share them.
 
 Found a miss? Use the *Redaction miss* issue form **with a fake value of the same shape**. If a real value leaked, report it privately ([SECURITY.md](../SECURITY.md)).

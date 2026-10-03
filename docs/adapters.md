@@ -8,7 +8,7 @@
 | Codex CLI | rollout `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` (`codex import`, `codex tail`) | Reasoning summaries → `summary`, `encrypted_content` only → `none`. Non-zero exit code → `isError`. `token_count` → `usage`. |
 | MCP | any MCP host calling `log_event` etc. | Only sees what the host sends. |
 
-Both file adapters were built against documented formats and **synthetic** fixtures (`test/fixtures/`). Validation on real sessions is tracked in [#10](https://github.com/SM260845/agent-session-recorder/issues/10).
+Both file adapters were built against documented formats and **synthetic** fixtures (`test/fixtures/`). Validation on real sessions is tracked in [#10](https://github.com/ao3575911/agent-session-recorder/issues/10).
 
 ## Writing a new one
 
@@ -21,4 +21,4 @@ Use `src/adapters/codex.ts` as the template. It's a line-by-line parser, the sim
 5. **Test** with a tiny synthetic fixture: check event order, `validateEvent` returning `[]`, `parentId` linkage, and that a planted fake secret plus a `/home/<user>` path are both absent.
 6. **Expose** it: a CLI subcommand in `src/cli.ts`, an export in `src/index.ts`, and a row in the README table and above.
 
-Wanted: Grok CLI ([#2](https://github.com/SM260845/agent-session-recorder/issues/2)), direct APIs via proxy ([#1](https://github.com/SM260845/agent-session-recorder/issues/1)), OTel ingest ([#8](https://github.com/SM260845/agent-session-recorder/issues/8)).
+Wanted: Grok CLI ([#2](https://github.com/ao3575911/agent-session-recorder/issues/2)), direct APIs via proxy ([#1](https://github.com/ao3575911/agent-session-recorder/issues/1)), OTel ingest ([#8](https://github.com/ao3575911/agent-session-recorder/issues/8)).

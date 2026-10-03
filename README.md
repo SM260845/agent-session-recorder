@@ -10,7 +10,7 @@
 
 A local-first flight recorder for AI coding agents. Every prompt, tool call, and decision, on one redacted timeline.
 
-[![CI](https://github.com/SM260845/agent-session-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/SM260845/agent-session-recorder/actions/workflows/ci.yml)
+[![CI](https://github.com/ao3575911/agent-session-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/ao3575911/agent-session-recorder/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D22.12-339933?logo=node.js&logoColor=white)](package.json)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -21,15 +21,12 @@ A local-first flight recorder for AI coding agents. Every prompt, tool call, and
 - **Why:** a diff shows you what changed. The session shows you how the agent got there: the prompts, the tool calls, the dead ends. That part is usually lost.
 - **How:** everything stays on your machine. Secrets are redacted before anything touches disk. Reasoning is stored only when the provider exposes it, and it's labelled honestly.
 
-> **Status: v0.1.** The adapters are built against documented formats and tested on synthetic fixtures. Real-world transcripts are wanted ([#10](https://github.com/SM260845/agent-session-recorder/issues/10)).
+> **Status: v0.2.** The adapters are built against documented formats and tested on synthetic fixtures. Real-world transcripts are wanted ([#10](https://github.com/ao3575911/agent-session-recorder/issues/10)).
 
 ## ⚡ 30-second quickstart
 
-Not on npm yet, so install from a clone:
-
 ```bash
-git clone https://github.com/SM260845/agent-session-recorder && cd agent-session-recorder
-npm ci && npm run build && npm link   # installs the `agent-session-recorder` command
+npm install --global agent-session-recorder
 agent-session-recorder init           # dry-run: detects claude/codex, prints the config it would add
 agent-session-recorder init --write   # Claude hooks (+ .bak) and Codex MCP config
 agent-session-recorder view           # live timeline at http://127.0.0.1:4318
@@ -46,7 +43,7 @@ More commands: `import-claude <file>`, `codex import|tail [--latest]`, `mcp`, `e
 | **Claude Code** (hooks + transcript) | ✅ | `summary` (4+), `full` (3.7), `none` (redacted) | ✅ Pre/PostToolUse | ✅ measured | ✅ |
 | **Codex CLI** (rollout import + live tail) | ✅ | `summary`; `none` if encrypted-only | ✅ exit code → error | ✅ | ✅ |
 | **MCP** (any host) | only what the agent logs | only what the agent sends | only what the agent sends | ✅ event ts | if sent |
-| Direct APIs (OpenAI / Anthropic / xAI) | 🔜 [#1](https://github.com/SM260845/agent-session-recorder/issues/1) | 🔜 [#3](https://github.com/SM260845/agent-session-recorder/issues/3) | | | |
+| Direct APIs (OpenAI / Anthropic / xAI) | 🔜 [#1](https://github.com/ao3575911/agent-session-recorder/issues/1) | 🔜 [#3](https://github.com/ao3575911/agent-session-recorder/issues/3) | | | |
 
 The MCP server (`start_session`, `log_event`, `end_session`, `export`) only knows what the host tells it. [`SKILL.md`](SKILL.md) asks agents to report their plan, decisions, and outcome. Schema details are in [docs/event-schema.md](docs/event-schema.md).
 
@@ -78,19 +75,19 @@ More detail in [docs/architecture.md](docs/architecture.md) and [docs/adapters.m
 
 ## 🛠️ Contribute in 10 minutes
 
-1. Pick a [`good first issue`](https://github.com/SM260845/agent-session-recorder/labels/good%20first%20issue). Each one points to the files you'll need.
+1. Pick a [`good first issue`](https://github.com/ao3575911/agent-session-recorder/labels/good%20first%20issue). Each one points to the files you'll need.
 2. `npm ci && npm run build && npm test`: green in well under a minute.
 3. Read [CONTRIBUTING.md](CONTRIBUTING.md) (it's short). Using an AI agent? Point it at [AGENTS.md](AGENTS.md).
 
-Have questions or ideas? Head to [Discussions](https://github.com/SM260845/agent-session-recorder/discussions).
+Have questions or ideas? Head to [Discussions](https://github.com/ao3575911/agent-session-recorder/discussions).
 
 ## 🗺️ Roadmap
 
-[API proxy #1](https://github.com/SM260845/agent-session-recorder/issues/1) · [Grok CLI adapter #2](https://github.com/SM260845/agent-session-recorder/issues/2) · [xAI reasoning #3](https://github.com/SM260845/agent-session-recorder/issues/3) · [NER redaction #4](https://github.com/SM260845/agent-session-recorder/issues/4) · [Session diff #5](https://github.com/SM260845/agent-session-recorder/issues/5) · [Cost charts #6](https://github.com/SM260845/agent-session-recorder/issues/6) · [Dataset export #7](https://github.com/SM260845/agent-session-recorder/issues/7) · [OTel #8](https://github.com/SM260845/agent-session-recorder/issues/8) · [Cloud sync #9](https://github.com/SM260845/agent-session-recorder/issues/9) · [Real-session validation #10](https://github.com/SM260845/agent-session-recorder/issues/10)
+[API proxy #1](https://github.com/ao3575911/agent-session-recorder/issues/1) · [Grok CLI adapter #2](https://github.com/ao3575911/agent-session-recorder/issues/2) · [xAI reasoning #3](https://github.com/ao3575911/agent-session-recorder/issues/3) · [NER redaction #4](https://github.com/ao3575911/agent-session-recorder/issues/4) · [Session diff #5](https://github.com/ao3575911/agent-session-recorder/issues/5) · [Cost charts #6](https://github.com/ao3575911/agent-session-recorder/issues/6) · [Dataset export #7](https://github.com/ao3575911/agent-session-recorder/issues/7) · [OTel #8](https://github.com/ao3575911/agent-session-recorder/issues/8) · [Cloud sync #9](https://github.com/ao3575911/agent-session-recorder/issues/9) · [Real-session validation #10](https://github.com/ao3575911/agent-session-recorder/issues/10)
 
 ## 📚 The series behind it
 
-1. [Part 1](https://gist.github.com/SM260845/0941ebfa5d91728d79663fb240adf9b0) · 2. [Part 2](https://gist.github.com/SM260845/d844d0af560490b5435904dd7f84abef) · 3. [Part 3](https://gist.github.com/SM260845/88a561948656703bd007d6ec78756236)
+1. [Part 1](https://gist.github.com/ao3575911/5a6a8c69cd48d896add442a33a9709fe) · 2. [Part 2](https://gist.github.com/ao3575911/eb6866acd9d6e015ba883e406fdc9a6b) · 3. [Part 3](https://gist.github.com/ao3575911/fd97f0e7077faeb2526b38510ee8c2cb)
 
 ## License
 
